@@ -3,9 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using PlataformaVentas.Api.Data;
 using PlataformaVentas.Api.DTOs.Productos;
 using PlataformaVentas.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PlataformaVentas.Api.Controllers;
-
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class ProductosController : ControllerBase
@@ -17,6 +18,7 @@ public class ProductosController : ControllerBase
         _context = context;
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpPost]
     public async Task<IActionResult> CrearProducto(CrearProductoDto dto)
     {
@@ -39,7 +41,7 @@ public class ProductosController : ControllerBase
             producto
         );
     }
-
+   
     [HttpGet]
     public async Task<IActionResult> ObtenerProductos()
     {
@@ -50,6 +52,7 @@ public class ProductosController : ControllerBase
         return Ok(productos);
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> EditarProducto(Guid id, EditarProductoDto dto)
     {
@@ -74,6 +77,7 @@ public class ProductosController : ControllerBase
         return Ok(producto);
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpPatch("{id:guid}/desactivar")]
     public async Task<IActionResult> DesactivarProducto(Guid id)
     {
@@ -101,6 +105,7 @@ public class ProductosController : ControllerBase
         });
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> EliminarProducto(Guid id)
     {
@@ -135,6 +140,7 @@ public class ProductosController : ControllerBase
         });
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> ObtenerProducto(Guid id)
     {
