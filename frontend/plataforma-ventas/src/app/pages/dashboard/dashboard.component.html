@@ -1,0 +1,66 @@
+<div class="dashboard">
+
+  <aside class="sidebar">
+
+    <div class="logo">
+      <h2>Ventas</h2>
+    </div>
+
+    <nav>
+      <button>Inicio</button>
+      <button>Ventas</button>
+      <button routerLink="/productos">
+        Productos
+      </button>
+      <button>Reportes</button>
+
+      <button *ngIf="usuario?.rol === 'Administrador'">
+        Usuarios
+      </button>
+    </nav>
+
+    <button
+      class="logout"
+      (click)="cerrarSesion()"
+    >
+      Cerrar sesión
+    </button>
+
+  </aside>
+
+  <main class="content">
+
+    <header>
+      <div>
+        <h1>Panel principal</h1>
+        <p>Gestión y control de ventas</p>
+      </div>
+
+      <div class="user-info">
+        <strong>{{ usuario?.nombreCompleto }}</strong>
+        <span>{{ usuario?.rol }}</span>
+      </div>
+    </header>
+
+    <section class="cards">
+
+      <div class="card">
+        <h3>Ingresos de hoy</h3>
+        <p>Q {{ totalIngresos | number:'1.2-2' }}</p>
+        </div>
+
+        <div class="card">
+        <h3>Ventas de hoy</h3>
+        <p>{{ totalVentas }}</p>
+        </div>
+
+      <div class="card">
+        <h3>Productos activos</h3>
+        <p>{{ totalProductos }}</p>
+        </div>
+
+    </section>
+
+  </main>
+
+</div>
