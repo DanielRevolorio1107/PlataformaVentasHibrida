@@ -116,4 +116,108 @@ public class VentasController : ControllerBase
             venta.Estado
         });
     }
+
+    [HttpGet]
+    public async Task<IActionResult> ObtenerVentas()
+    {
+        var ventas = await _context.Ventas
+            .Include(v => v.Usuario)
+            .Include(v => v.MetodoPago)
+            .Include(v => v.Detalles)
+                .ThenInclude(d => d.Producto)
+            .OrderByDescending(v => v.FechaVenta)
+            .Select(v => new
+            {
+                v.Id,
+                v.FechaVenta,
+                v.Total,
+                v.Estado,
+                v.Observaciones,
+                Usuario = v.Usuario.NombreCompleto,
+                MetodoPago = v.MetodoPago.Nombre,
+                Detalles = v.Detalles.Select(d => new
+                {
+                    Producto = d.Producto.Nombre,
+                    d.Cantidad,
+                    d.PrecioUnitario,
+                    d.Subtotal
+                })
+            })
+            .ToListAsync();
+
+        return Ok(ventas);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> ObtenerVentaPorId(Guid id)
+    {
+        var venta = await _context.Ventas
+            .Include(v => v.Usuario)
+            .Include(v => v.MetodoPago)
+            .Include(v => v.Detalles)
+                .ThenInclude(d => d.Producto)
+            .Where(v => v.Id == id)
+            .Select(v => new
+            {
+                v.Id,
+                v.FechaVenta,
+                v.Total,
+                v.Estado,
+                v.Observaciones,
+                Usuario = v.Usuario.NombreCompleto,
+                MetodoPago = v.MetodoPago.Nombre,
+                Detalles = v.Detalles.Select(d => new
+                {
+                    Producto = d.Producto.Nombre,
+                    d.Cantidad,
+                    d.PrecioUnitario,
+                    d.Subtotal
+                })
+            })
+            .FirstOrDefaultAsync();
+
+        if (venta == null)
+        {
+            return NotFound(new
+            {
+                mensaje = "Venta no encontrada"
+            });
+        }
+
+        return Ok(venta);
+    }
+
+    [Authorize(Roles = "Administrador")]
+    [HttpPatch("{id:guid}/anular")]
+    public async Task<IActionResult> AnularVenta(Guid id)
+    {
+        var venta = await _context.Ventas.FindAsync(id);
+
+        if (venta == null)
+        {
+            return NotFound(new
+            {
+                mensaje = "Venta no encontrada"
+            });
+        }
+
+        if (venta.Estado == "ANULADA")
+        {
+            return Conflict(new
+            {
+                mensaje = "La venta ya se encuentra anulada"
+            });
+        }
+
+        venta.Estado = "ANULADA";
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            mensaje = "Venta anulada correctamente",
+            venta.Id,
+            venta.Estado
+        });
+    }
 }
