@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PlataformaVentas.Api.Controllers;
 
@@ -29,6 +30,7 @@ public class UsuariosController : ControllerBase
         _configuration = configuration;
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpPost]
     public async Task<IActionResult> CrearUsuario(CrearUsuarioDto dto)
     {
@@ -154,6 +156,94 @@ public class UsuariosController : ControllerBase
                 usuario.NombreUsuario,
                 rol = usuario.Rol.Nombre
             }
+        });
+    }
+
+    [Authorize(Roles = "Administrador")]
+    [HttpGet]
+    public async Task<IActionResult> ObtenerUsuarios()
+    {
+        var usuarios = await _context.Usuarios
+            .Include(u => u.Rol)
+            .OrderBy(u => u.NombreCompleto)
+            .Select(u => new
+            {
+                u.Id,
+                u.NombreCompleto,
+                u.NombreUsuario,
+                Rol = u.Rol.Nombre,
+                u.Activo,
+                u.FechaCreacion
+            })
+            .ToListAsync();
+
+        return Ok(usuarios);
+    }
+
+    [Authorize(Roles = "Administrador")]
+    [HttpPatch("{id:guid}/desactivar")]
+    public async Task<IActionResult> DesactivarUsuario(Guid id)
+    {
+        var usuario = await _context.Usuarios.FindAsync(id);
+
+        if (usuario == null)
+        {
+            return NotFound(new
+            {
+                mensaje = "Usuario no encontrado"
+            });
+        }
+
+        var usuarioActualIdTexto = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (Guid.TryParse(usuarioActualIdTexto, out Guid usuarioActualId)
+            && usuarioActualId == id)
+        {
+            return BadRequest(new
+            {
+                mensaje = "No puede desactivar su propio usuario."
+            });
+        }
+
+        usuario.Activo = false;
+        usuario.FechaActualizacion = DateTime.Now;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            mensaje = "Usuario desactivado correctamente",
+            usuario.Id,
+            usuario.NombreUsuario,
+            usuario.Activo
+        });
+    }
+
+    [Authorize(Roles = "Administrador")]
+    [HttpPatch("{id:guid}/activar")]
+    public async Task<IActionResult> ActivarUsuario(Guid id)
+    {
+        var usuario = await _context.Usuarios.FindAsync(id);
+
+        if (usuario == null)
+        {
+            return NotFound(new
+            {
+                mensaje = "Usuario no encontrado"
+            });
+        }
+
+        usuario.Activo = true;
+        usuario.FechaActualizacion = DateTime.Now;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            mensaje = "Usuario activado correctamente",
+            usuario.Id,
+            usuario.NombreUsuario,
+            usuario.Activo
         });
     }
 }

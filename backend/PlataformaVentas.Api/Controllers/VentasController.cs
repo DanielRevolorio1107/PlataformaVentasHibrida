@@ -53,6 +53,49 @@ public class VentasController : ControllerBase
                 mensaje = "La venta debe contener al menos un producto."
             });
         }
+        var hoy = DateTime.Today;
+
+        var menuHoy = await _context.MenusDiarios
+            .Include(m => m.Detalles)
+            .FirstOrDefaultAsync(m =>
+                m.Fecha == hoy &&
+                m.Activo);
+
+        if (menuHoy == null)
+        {
+            return BadRequest(new
+            {
+                mensaje = "No existe un menú activo para hoy."
+            });
+        }
+
+        var productosRepetidos = dto.Detalles
+            .GroupBy(d => d.ProductoId)
+            .Any(g => g.Count() > 1);
+
+        if (productosRepetidos)
+        {
+            return BadRequest(new
+            {
+                mensaje = "No puede repetir el mismo producto en la venta."
+            });
+        }
+
+        var productosDisponibles = menuHoy.Detalles
+            .Where(d => d.Disponible)
+            .Select(d => d.ProductoId)
+            .ToHashSet();
+
+        foreach (var item in dto.Detalles)
+        {
+            if (!productosDisponibles.Contains(item.ProductoId))
+            {
+                return BadRequest(new
+                {
+                    mensaje = $"El producto {item.ProductoId} no está disponible en el menú de hoy."
+                });
+            }
+        }
 
         var venta = new Venta
         {

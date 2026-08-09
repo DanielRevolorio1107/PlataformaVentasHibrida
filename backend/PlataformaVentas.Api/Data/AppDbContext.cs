@@ -16,6 +16,8 @@ public class AppDbContext : DbContext
     public DbSet<MetodoPago> MetodosPago { get; set; }
     public DbSet<Venta> Ventas { get; set; }
     public DbSet<DetalleVenta> DetalleVentas { get; set; }
+    public DbSet<MenuDiario> MenusDiarios { get; set; }
+    public DbSet<MenuDetalle> MenuDetalles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -53,5 +55,12 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<DetalleVenta>()
             .Property(d => d.Subtotal)
             .HasPrecision(12, 2);
+
+        modelBuilder.Entity<MenuDiario>()
+            .HasKey(m => m.Id);
+
+        modelBuilder.Entity<MenuDetalle>()
+            .HasIndex(m => new { m.MenuDiarioId, m.ProductoId })
+            .IsUnique();
     }
 }
