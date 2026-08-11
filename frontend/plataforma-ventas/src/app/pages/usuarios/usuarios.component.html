@@ -1,0 +1,208 @@
+<div class="usuarios-page">
+
+  <header class="page-header">
+    <div>
+      <h1>Usuarios</h1>
+      <p>Administración de usuarios del sistema.</p>
+    </div>
+
+    <a routerLink="/dashboard" class="volver">
+      Volver al inicio
+    </a>
+  </header>
+
+  <section class="acciones-superiores">
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="mostrarFormulario = !mostrarFormulario"
+    >
+      {{ mostrarFormulario ? 'Cancelar' : 'Nuevo usuario' }}
+    </button>
+  </section>
+
+  <!-- FORMULARIO NUEVO USUARIO -->
+  <div
+    class="formulario-card"
+    *ngIf="mostrarFormulario"
+  >
+    <h2>Nuevo usuario</h2>
+
+    <div class="form-grid">
+
+      <div class="form-group">
+        <label for="nombreCompleto">Nombre completo</label>
+
+        <input
+          id="nombreCompleto"
+          type="text"
+          [(ngModel)]="nuevoUsuario.nombreCompleto"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="nombreUsuario">Usuario</label>
+
+        <input
+          id="nombreUsuario"
+          type="text"
+          [(ngModel)]="nuevoUsuario.nombreUsuario"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+
+        <input
+          id="password"
+          type="password"
+          [(ngModel)]="nuevoUsuario.password"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="rol">Rol</label>
+
+        <select
+          id="rol"
+          [(ngModel)]="nuevoUsuario.rolId"
+        >
+          <option value="">
+            Selecciona un rol
+          </option>
+
+          <option
+            *ngFor="let rol of roles"
+            [value]="rol.id"
+          >
+            {{ rol.nombre }}
+          </option>
+        </select>
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="crearUsuario()"
+        [disabled]="cargando"
+      >
+        {{ cargando ? 'Guardando...' : 'Guardar usuario' }}
+      </button>
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="mostrarFormulario = false"
+      >
+        Cancelar
+      </button>
+    </div>
+  </div>
+
+  <!-- TABLA -->
+  <div class="usuarios-card">
+
+    <div class="tabla-header">
+      <h2>Usuarios registrados</h2>
+
+      <span>
+        {{ usuarios.length }} usuario(s)
+      </span>
+    </div>
+
+    <div
+      class="tabla-contenedor"
+      *ngIf="usuarios.length > 0"
+    >
+      <table>
+
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Usuario</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Fecha creación</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let usuario of usuarios">
+
+            <td class="nombre">
+              {{ usuario.nombreCompleto }}
+            </td>
+
+            <td>
+              {{ usuario.nombreUsuario }}
+            </td>
+
+            <td>
+              {{ usuario.rol }}
+            </td>
+
+            <td>
+              <span
+                class="estado"
+                [class.activo]="usuario.activo"
+                [class.inactivo]="!usuario.activo"
+              >
+                {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+
+            <td>
+              {{ usuario.fechaCreacion | date:'dd/MM/yyyy' }}
+            </td>
+
+            <td class="acciones">
+
+              <button
+                *ngIf="usuario.activo"
+                type="button"
+                class="btn-desactivar"
+                (click)="desactivarUsuario(usuario)"
+              >
+                Desactivar
+              </button>
+
+              <button
+                *ngIf="!usuario.activo"
+                type="button"
+                class="btn-activar"
+                (click)="activarUsuario(usuario)"
+              >
+                Activar
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+    </div>
+
+    <div
+      class="sin-usuarios"
+      *ngIf="usuarios.length === 0"
+    >
+      No hay usuarios registrados.
+    </div>
+
+  </div>
+
+  <div
+    class="mensaje"
+    *ngIf="mensaje"
+  >
+    {{ mensaje }}
+  </div>
+
+</div>

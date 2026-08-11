@@ -1,1 +1,346 @@
-<p>productos works!</p>
+<div class="productos-page">
+
+  <!-- ENCABEZADO -->
+  <header class="page-header">
+    <div>
+      <h1>Productos</h1>
+      <p>Administración del catálogo de productos.</p>
+    </div>
+
+    <a routerLink="/dashboard" class="volver">
+      Volver al inicio
+    </a>
+  </header>
+
+
+  <!-- ACCIONES SUPERIORES -->
+  <section
+    class="acciones-superiores"
+    *ngIf="usuario?.rol === 'Administrador'"
+  >
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="mostrarFormulario = !mostrarFormulario"
+    >
+      {{ mostrarFormulario ? 'Cancelar' : 'Nuevo producto' }}
+    </button>
+  </section>
+
+
+  <!-- FORMULARIO NUEVO PRODUCTO -->
+  <div
+    class="formulario-card"
+    *ngIf="mostrarFormulario && usuario?.rol === 'Administrador'"
+  >
+
+    <h2>Nuevo producto</h2>
+
+    <div class="form-grid">
+
+      <div class="form-group">
+        <label for="nuevoNombre">
+          Nombre
+        </label>
+
+        <input
+          id="nuevoNombre"
+          type="text"
+          [(ngModel)]="nuevoProducto.nombre"
+          placeholder="Nombre del producto"
+        >
+      </div>
+
+
+      <div class="form-group">
+        <label for="nuevaDescripcion">
+          Descripción
+        </label>
+
+        <input
+          id="nuevaDescripcion"
+          type="text"
+          [(ngModel)]="nuevoProducto.descripcion"
+          placeholder="Descripción del producto"
+        >
+      </div>
+
+
+      <div class="form-group">
+        <label for="nuevoPrecio">
+          Precio
+        </label>
+
+        <input
+          id="nuevoPrecio"
+          type="number"
+          min="0.01"
+          step="0.01"
+          [(ngModel)]="nuevoProducto.precio"
+        >
+      </div>
+
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="crearProducto()"
+        [disabled]="cargando"
+      >
+        {{ cargando ? 'Guardando...' : 'Guardar producto' }}
+      </button>
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="mostrarFormulario = false"
+      >
+        Cancelar
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- CATÁLOGO DE PRODUCTOS -->
+  <div class="productos-card">
+
+    <div class="tabla-header">
+
+      <h2>Catálogo de productos</h2>
+
+      <span>
+        {{ productos.length }} producto(s)
+      </span>
+
+    </div>
+
+
+    <!-- TABLA -->
+    <div
+      class="tabla-contenedor"
+      *ngIf="productos.length > 0"
+    >
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Producto</th>
+            <th>Descripción</th>
+            <th>Precio</th>
+            <th>Estado</th>
+
+            <th *ngIf="usuario?.rol === 'Administrador'">
+              Acciones
+            </th>
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr *ngFor="let producto of productos">
+
+            <!-- NOMBRE -->
+            <td class="producto-nombre">
+              {{ producto.nombre }}
+            </td>
+
+
+            <!-- DESCRIPCIÓN -->
+            <td>
+              {{ producto.descripcion || '-' }}
+            </td>
+
+
+            <!-- PRECIO -->
+            <td class="precio">
+              Q {{ producto.precio | number:'1.2-2' }}
+            </td>
+
+
+            <!-- ESTADO -->
+            <td>
+
+              <span
+                class="estado"
+                [class.activo]="producto.activo"
+                [class.inactivo]="!producto.activo"
+              >
+                {{ producto.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+
+            </td>
+
+
+            <!-- ACCIONES -->
+            <td
+              class="acciones"
+              *ngIf="usuario?.rol === 'Administrador'"
+            >
+
+              <!-- EDITAR -->
+              <button
+                type="button"
+                class="btn-editar"
+                (click)="editarProducto(producto)"
+              >
+                Editar
+              </button>
+
+
+              <!-- DESACTIVAR -->
+              <button
+                *ngIf="producto.activo"
+                type="button"
+                class="btn-desactivar"
+                (click)="desactivarProducto(producto)"
+              >
+                Desactivar
+              </button>
+
+
+              <!-- ACTIVAR -->
+              <button
+                *ngIf="!producto.activo"
+                type="button"
+                class="btn-activar"
+                (click)="activarProducto(producto)"
+              >
+                Activar
+              </button>
+
+
+              <!-- ELIMINAR -->
+              <button
+                type="button"
+                class="btn-eliminar"
+                (click)="eliminarProducto(producto)"
+              >
+                Eliminar
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- SIN PRODUCTOS -->
+    <div
+      class="sin-productos"
+      *ngIf="productos.length === 0"
+    >
+      No hay productos registrados.
+    </div>
+
+  </div>
+
+
+  <!-- FORMULARIO EDITAR PRODUCTO -->
+  <div
+    class="formulario-card"
+    *ngIf="productoEditando && usuario?.rol === 'Administrador'"
+  >
+
+    <h2>Editar producto</h2>
+
+    <div class="form-grid">
+
+
+      <div class="form-group">
+
+        <label for="editarNombre">
+          Nombre
+        </label>
+
+        <input
+          id="editarNombre"
+          type="text"
+          [(ngModel)]="productoEditando.nombre"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="editarDescripcion">
+          Descripción
+        </label>
+
+        <input
+          id="editarDescripcion"
+          type="text"
+          [(ngModel)]="productoEditando.descripcion"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="editarPrecio">
+          Precio
+        </label>
+
+        <input
+          id="editarPrecio"
+          type="number"
+          min="0.01"
+          step="0.01"
+          [(ngModel)]="productoEditando.precio"
+        >
+
+      </div>
+
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="guardarEdicion()"
+        [disabled]="cargando"
+      >
+        {{ cargando ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
+
+
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="cancelarEdicion()"
+      >
+        Cancelar
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- MENSAJE -->
+  <div
+    class="mensaje"
+    *ngIf="mensaje"
+  >
+    {{ mensaje }}
+  </div>
+
+</div>

@@ -1,0 +1,182 @@
+<div class="historial-page">
+
+  <!-- ENCABEZADO -->
+  <header class="page-header">
+
+    <div>
+      <h1>Historial de ventas</h1>
+      <p>Consulta y administración de las ventas registradas.</p>
+    </div>
+
+    <a
+      routerLink="/dashboard"
+      class="volver"
+    >
+      Volver al inicio
+    </a>
+
+  </header>
+
+
+  <!-- TARJETA PRINCIPAL -->
+  <section class="historial-card">
+
+    <div class="tabla-header">
+
+      <div>
+        <h2>Ventas registradas</h2>
+        <p>
+          Se muestran tanto las ventas registradas como las anuladas.
+        </p>
+      </div>
+
+      <span>
+        {{ ventas.length }} venta(s)
+      </span>
+
+    </div>
+
+
+    <!-- CARGANDO -->
+    <div
+      class="estado-carga"
+      *ngIf="cargando"
+    >
+      Cargando historial...
+    </div>
+
+
+    <!-- TABLA -->
+    <div
+      class="tabla-contenedor"
+      *ngIf="ventas.length > 0 && !cargando"
+    >
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Usuario</th>
+            <th>Método de pago</th>
+            <th>Productos</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+
+        <tbody>
+
+          <tr *ngFor="let venta of ventas">
+
+            <!-- FECHA -->
+            <td class="fecha">
+              {{ venta.fechaVenta | date:'dd/MM/yyyy HH:mm' }}
+            </td>
+
+
+            <!-- USUARIO -->
+            <td>
+              {{ venta.usuario }}
+            </td>
+
+
+            <!-- MÉTODO DE PAGO -->
+            <td>
+              {{ venta.metodoPago }}
+            </td>
+
+
+            <!-- PRODUCTOS -->
+            <td>
+
+              <div
+                class="detalle-producto"
+                *ngFor="let detalle of venta.detalles"
+              >
+
+                <span class="producto">
+                  {{ detalle.producto }}
+                </span>
+
+                <span class="cantidad">
+                  x{{ detalle.cantidad }}
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- TOTAL -->
+            <td class="total">
+              Q {{ venta.total | number:'1.2-2' }}
+            </td>
+
+
+            <!-- ESTADO -->
+            <td>
+
+              <span
+                class="estado"
+                [class.registrada]="venta.estado === 'REGISTRADA'"
+                [class.anulada]="venta.estado === 'ANULADA'"
+              >
+                {{ venta.estado }}
+              </span>
+
+            </td>
+
+
+            <!-- ACCIONES -->
+            <td>
+
+              <button
+                *ngIf="venta.estado === 'REGISTRADA'"
+                type="button"
+                class="btn-anular"
+                (click)="anularVenta(venta)"
+              >
+                Anular
+              </button>
+
+              <span
+                class="sin-accion"
+                *ngIf="venta.estado === 'ANULADA'"
+              >
+                Sin acciones
+              </span>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- SIN VENTAS -->
+    <div
+      class="sin-datos"
+      *ngIf="ventas.length === 0 && !cargando"
+    >
+      No hay ventas registradas.
+    </div>
+
+  </section>
+
+
+  <!-- MENSAJE -->
+  <div
+    class="mensaje"
+    *ngIf="mensaje"
+  >
+    {{ mensaje }}
+  </div>
+
+</div>

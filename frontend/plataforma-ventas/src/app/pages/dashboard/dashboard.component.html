@@ -19,11 +19,21 @@
         routerLink="/menu-diario">
         Menú diario
       </button>
-      <button>Reportes</button>
-
-      <button *ngIf="usuario?.rol === 'Administrador'">
-        Usuarios
+      <button routerLink="/reportes">
+       Reportes
       </button>
+      <button
+        *ngIf="usuario?.rol === 'Administrador'"
+        routerLink="/usuarios"
+      >
+         Usuarios
+      </button>
+      <button
+      *ngIf="usuario?.rol === 'Administrador'"
+       routerLink="/historial-ventas"
+      >
+        Historial de ventas
+    </button>
     </nav>
 
     <button

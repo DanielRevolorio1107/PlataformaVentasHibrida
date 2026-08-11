@@ -4,6 +4,9 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { ProductosComponent } from './pages/productos/productos.component';
 import { MenuDiarioComponent } from './pages/menu-diario/menu-diario.component';
 import { VentasComponent } from './pages/ventas/ventas.component';
+import { UsuariosComponent } from './pages/usuarios/usuarios.component';
+import { ReportesComponent } from './pages/reportes/reportes.component';
+import { HistorialVentasComponent } from './pages/historial-ventas/historial-ventas.component';
 
 export const routes: Routes = [
   {
@@ -25,6 +28,18 @@ export const routes: Routes = [
  {
   path: 'ventas',
   component: VentasComponent
+},
+{
+  path: 'usuarios',
+  component: UsuariosComponent
+},
+{
+  path: 'reportes',
+  component: ReportesComponent
+},
+{
+  path: 'historial-ventas',
+  component: HistorialVentasComponent
 },
   {
     path: '',

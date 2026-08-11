@@ -156,4 +156,32 @@ public class ProductosController : ControllerBase
 
         return Ok(producto);
     }
+
+    [Authorize(Roles = "Administrador")]
+    [HttpPatch("{id:guid}/activar")]
+    public async Task<IActionResult> ActivarProducto(Guid id)
+    {
+        var producto = await _context.Productos.FindAsync(id);
+
+        if (producto == null)
+        {
+            return NotFound(new
+            {
+                mensaje = "Producto no encontrado"
+            });
+        }
+
+        producto.Activo = true;
+        producto.FechaActualizacion = DateTime.Now;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            mensaje = "Producto activado correctamente",
+            producto.Id,
+            producto.Nombre,
+            producto.Activo
+        });
+    }
 }

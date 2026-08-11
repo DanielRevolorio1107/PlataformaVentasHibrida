@@ -1,0 +1,316 @@
+.historial-page {
+  min-height: 100vh;
+  padding: 30px;
+  background: #f4f6f8;
+}
+
+
+/* ENCABEZADO */
+
+.page-header {
+  max-width: 1200px;
+  margin: 0 auto 25px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h1 {
+    margin: 0 0 5px;
+
+    font-size: 30px;
+
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0;
+
+    color: #6b7280;
+  }
+}
+
+
+.volver {
+  color: #1f2937;
+
+  text-decoration: none;
+
+  font-weight: 600;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+
+/* TARJETA */
+
+.historial-card {
+  max-width: 1200px;
+
+  margin: 0 auto 25px;
+
+  padding: 25px;
+
+  background: white;
+
+  border-radius: 12px;
+
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+
+/* ENCABEZADO DE TABLA */
+
+.tabla-header {
+  margin-bottom: 20px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h2 {
+    margin: 0 0 5px;
+
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0;
+
+    color: #6b7280;
+
+    font-size: 14px;
+  }
+
+  > span {
+    color: #6b7280;
+
+    font-size: 14px;
+
+    white-space: nowrap;
+  }
+}
+
+
+/* TABLA */
+
+.tabla-contenedor {
+  width: 100%;
+
+  overflow-x: auto;
+}
+
+
+table {
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+
+thead {
+  background: #f3f4f6;
+}
+
+
+th {
+  padding: 13px 15px;
+
+  text-align: left;
+
+  color: #374151;
+
+  font-size: 14px;
+
+  white-space: nowrap;
+}
+
+
+td {
+  padding: 15px;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  color: #4b5563;
+
+  vertical-align: middle;
+}
+
+
+tbody tr {
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: #f9fafb;
+  }
+}
+
+
+.fecha {
+  white-space: nowrap;
+}
+
+
+.total {
+  font-weight: 700;
+
+  color: #1f2937;
+
+  white-space: nowrap;
+}
+
+
+/* PRODUCTOS DE LA VENTA */
+
+.detalle-producto {
+  display: flex;
+
+  gap: 7px;
+
+  margin-bottom: 5px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+
+.producto {
+  color: #374151;
+
+  font-weight: 500;
+}
+
+
+.cantidad {
+  color: #6b7280;
+
+  font-size: 13px;
+}
+
+
+/* ESTADOS */
+
+.estado {
+  display: inline-block;
+
+  padding: 5px 10px;
+
+  border-radius: 20px;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  &.registrada {
+    background: #dcfce7;
+
+    color: #166534;
+  }
+
+  &.anulada {
+    background: #fee2e2;
+
+    color: #991b1b;
+  }
+}
+
+
+/* BOTÓN ANULAR */
+
+.btn-anular {
+  border: none;
+
+  border-radius: 7px;
+
+  padding: 8px 13px;
+
+  background: #dc2626;
+
+  color: white;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+  &:hover {
+    background: #b91c1c;
+  }
+}
+
+
+.sin-accion {
+  color: #9ca3af;
+
+  font-size: 13px;
+}
+
+
+/* ESTADOS GENERALES */
+
+.estado-carga,
+.sin-datos {
+  padding: 35px;
+
+  text-align: center;
+
+  color: #6b7280;
+
+  background: #f9fafb;
+
+  border-radius: 8px;
+}
+
+
+/* MENSAJE */
+
+.mensaje {
+  max-width: 1200px;
+
+  margin: 20px auto;
+
+  padding: 14px;
+
+  background: white;
+
+  border-radius: 7px;
+
+  text-align: center;
+
+  color: #374151;
+
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 800px) {
+
+  .historial-page {
+    padding: 20px;
+  }
+
+  .page-header {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 20px;
+  }
+
+  .tabla-header {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 10px;
+  }
+
+  .historial-card {
+    padding: 18px;
+  }
+
+}
