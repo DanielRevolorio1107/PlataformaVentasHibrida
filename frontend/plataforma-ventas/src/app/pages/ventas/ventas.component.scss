@@ -1,0 +1,139 @@
+.ventas-page {
+  min-height: 100vh;
+  background: #f4f6f8;
+  padding: 30px;
+}
+
+.page-header {
+  max-width: 900px;
+  margin: 0 auto 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h1 {
+    margin: 0 0 5px;
+  }
+
+  p {
+    margin: 0;
+    color: #666;
+  }
+
+  a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+  }
+}
+
+.ventas-card {
+  max-width: 900px;
+  margin: auto;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.producto {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.producto-info {
+  display: flex;
+  flex-direction: column;
+
+  span {
+    color: #666;
+    margin-top: 4px;
+  }
+
+  small {
+    margin-top: 5px;
+    font-weight: 600;
+  }
+}
+
+.cantidad {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  button {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 20px;
+  }
+
+  span {
+    min-width: 20px;
+    text-align: center;
+    font-weight: 600;
+  }
+}
+
+.form-group {
+  margin-top: 25px;
+
+  label {
+    display: block;
+    margin-bottom: 7px;
+    font-weight: 600;
+  }
+
+  select,
+  textarea {
+    width: 100%;
+    padding: 11px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
+  textarea {
+    min-height: 80px;
+    resize: vertical;
+  }
+}
+
+.total {
+  margin-top: 30px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 22px;
+
+  strong {
+    font-size: 28px;
+  }
+}
+
+.registrar {
+  width: 100%;
+  margin-top: 25px;
+  padding: 14px;
+  border: none;
+  border-radius: 7px;
+  background: #1f2937;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.registrar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.mensaje {
+  max-width: 900px;
+  margin: 20px auto;
+  text-align: center;
+}

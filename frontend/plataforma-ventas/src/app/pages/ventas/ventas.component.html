@@ -1,0 +1,119 @@
+<div class="ventas-page">
+
+  <header class="page-header">
+    <div>
+      <h1>Registrar venta</h1>
+      <p>Selecciona los productos del menú disponible de hoy.</p>
+    </div>
+
+    <a routerLink="/dashboard">
+      Volver al inicio
+    </a>
+  </header>
+
+  <div class="ventas-card" *ngIf="menu">
+
+    <h2>Menú de hoy</h2>
+
+    <div
+      class="producto"
+      *ngFor="let producto of menu.productos"
+    >
+
+      <div class="producto-info">
+        <strong>{{ producto.nombre }}</strong>
+
+        <span *ngIf="producto.descripcion">
+          {{ producto.descripcion }}
+        </span>
+
+        <small>
+          Q {{ producto.precio | number:'1.2-2' }}
+        </small>
+      </div>
+
+      <div class="cantidad">
+
+        <button
+          type="button"
+          (click)="disminuirCantidad(producto)"
+        >
+          -
+        </button>
+
+        <span>
+          {{ producto.cantidad }}
+        </span>
+
+        <button
+          type="button"
+          (click)="aumentarCantidad(producto)"
+        >
+          +
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="form-group">
+      <label for="metodoPago">
+        Método de pago
+      </label>
+
+      <select
+        id="metodoPago"
+        [(ngModel)]="metodoPagoId"
+      >
+        <option value="">
+          Selecciona un método
+        </option>
+
+        <option
+          *ngFor="let metodo of metodosPago"
+          [value]="metodo.id"
+        >
+          {{ metodo.nombre }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="observaciones">
+        Observaciones
+      </label>
+
+      <textarea
+        id="observaciones"
+        [(ngModel)]="observaciones"
+        placeholder="Opcional"
+      ></textarea>
+    </div>
+
+    <div class="total">
+      <span>Total</span>
+
+      <strong>
+        Q {{ calcularTotal() | number:'1.2-2' }}
+      </strong>
+    </div>
+
+    <button
+        type="button"
+        class="registrar"
+        (click)="registrarVenta()"
+        [disabled]="cargando"
+>
+        {{ cargando ? 'Registrando...' : 'Registrar venta' }}
+    </button>
+
+  </div>
+
+  <p
+    class="mensaje"
+    *ngIf="mensaje"
+  >
+    {{ mensaje }}
+  </p>
+
+</div>

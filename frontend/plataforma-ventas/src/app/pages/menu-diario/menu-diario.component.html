@@ -1,0 +1,118 @@
+<div class="menu-page">
+
+  <header class="page-header">
+    <div>
+      <h1>Menú diario</h1>
+      <p>Administra los platos disponibles para el almuerzo.</p>
+    </div>
+
+    <a routerLink="/dashboard">
+      Volver al inicio
+    </a>
+  </header>
+
+  <div class="menu-card">
+
+    <!-- SI YA EXISTE MENÚ -->
+    <div *ngIf="menuActual; else crearMenuTemplate">
+
+      <h2>Menú de hoy</h2>
+
+      <p>
+        {{ menuActual.fecha | date:'dd/MM/yyyy' }}
+      </p>
+
+      <div
+        class="producto"
+        *ngFor="let producto of menuActual.productos"
+      >
+
+        <div>
+          <strong>{{ producto.nombre }}</strong>
+
+          <span *ngIf="producto.descripcion">
+            {{ producto.descripcion }}
+          </span>
+
+          <small>
+            Q {{ producto.precio | number:'1.2-2' }}
+          </small>
+        </div>
+
+        <button
+          type="button"
+          (click)="cambiarDisponibilidad(producto)"
+        >
+          {{ producto.disponible ? 'Disponible' : 'Agotado' }}
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- SI NO EXISTE MENÚ -->
+    <ng-template #crearMenuTemplate>
+
+      <div class="fecha">
+        <label for="fecha">Fecha del menú</label>
+
+        <input
+          id="fecha"
+          type="date"
+          [(ngModel)]="fecha"
+        >
+      </div>
+
+      <h2>Seleccionar productos</h2>
+
+      <div
+        class="producto"
+        *ngFor="let producto of productos"
+      >
+
+        <input
+          type="checkbox"
+          [id]="producto.id"
+          (change)="cambiarSeleccion(
+            producto.id,
+            $any($event.target).checked
+          )"
+        >
+
+        <label [for]="producto.id">
+
+          <strong>{{ producto.nombre }}</strong>
+
+          <span *ngIf="producto.descripcion">
+            {{ producto.descripcion }}
+          </span>
+
+          <small>
+            Q {{ producto.precio | number:'1.2-2' }}
+          </small>
+
+        </label>
+
+      </div>
+
+      <button
+        type="button"
+        (click)="crearMenu()"
+        [disabled]="cargando"
+      >
+        {{ cargando ? 'Guardando...' : 'Crear menú del día' }}
+      </button>
+
+    </ng-template>
+
+    <p
+      class="mensaje"
+      *ngIf="mensaje"
+    >
+      {{ mensaje }}
+    </p>
+
+  </div>
+
+</div>

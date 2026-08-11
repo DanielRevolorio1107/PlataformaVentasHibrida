@@ -8,9 +8,16 @@
 
     <nav>
       <button>Inicio</button>
-      <button>Ventas</button>
+      <button routerLink="/ventas">
+        Ventas
+      </button>
       <button routerLink="/productos">
         Productos
+      </button>
+      <button
+        *ngIf="usuario?.rol === 'Administrador'"
+        routerLink="/menu-diario">
+        Menú diario
       </button>
       <button>Reportes</button>
 
