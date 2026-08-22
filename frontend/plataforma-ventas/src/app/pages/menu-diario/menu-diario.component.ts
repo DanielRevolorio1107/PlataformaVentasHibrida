@@ -1,13 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
+import { environment } from '../../../enviroments/enviromet';
 
 @Component({
   selector: 'app-menu-diario',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink
+  ],
   templateUrl: './menu-diario.component.html',
   styleUrl: './menu-diario.component.scss'
 })
@@ -15,6 +20,7 @@ export class MenuDiarioComponent implements OnInit {
 
   productos: any[] = [];
   productosSeleccionados: string[] = [];
+  productoAgregarId = '';
 
   menuActual: any = null;
 
@@ -23,16 +29,19 @@ export class MenuDiarioComponent implements OnInit {
   mensaje = '';
   cargando = false;
 
-  private productosUrl = 'http://localhost:5080/api/productos';
-  private menusUrl = 'http://localhost:5080/api/menus';
+  private productosUrl = `${environment.apiUrl}/productos`;
+  private menusUrl = `${environment.apiUrl}/menus`;
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.cargarMenuHoy();
+    this.cargarProductos();
   }
 
+
   obtenerFechaLocal(): string {
+
     const hoy = new Date();
 
     const anio = hoy.getFullYear();
@@ -42,63 +51,103 @@ export class MenuDiarioComponent implements OnInit {
     return `${anio}-${mes}-${dia}`;
   }
 
-  obtenerHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
 
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+  get productosFueraDelMenu(): any[] {
+
+    if (!this.menuActual) {
+      return this.productos;
+    }
+
+    const productosMenu = new Set(
+      this.menuActual.productos.map(
+        (producto: any) => producto.productoId
+      )
+    );
+
+    return this.productos.filter(
+      producto =>
+        producto.activo &&
+        !productosMenu.has(producto.id)
+    );
   }
 
+
   cargarMenuHoy(): void {
+
     this.http.get<any>(
-      `${this.menusUrl}/hoy`,
-      { headers: this.obtenerHeaders() }
+      `${this.menusUrl}/hoy`
     ).subscribe({
+
       next: (menu) => {
         this.menuActual = menu;
       },
+
       error: (error) => {
+
         if (error.status === 404) {
           this.menuActual = null;
-          this.cargarProductos();
           return;
         }
 
-        this.mensaje = 'No se pudo consultar el menú del día.';
+        this.mensaje =
+          'No se pudo consultar el menú del día.';
       }
+
     });
   }
+
 
   cargarProductos(): void {
+
     this.http.get<any[]>(
-      this.productosUrl,
-      { headers: this.obtenerHeaders() }
+      this.productosUrl
     ).subscribe({
+
       next: (productos) => {
-        this.productos = productos.filter(p => p.activo);
+
+        this.productos = productos.filter(
+          producto => producto.activo
+        );
       },
+
       error: () => {
-        this.mensaje = 'No se pudieron cargar los productos.';
+
+        this.mensaje =
+          'No se pudieron cargar los productos.';
       }
+
     });
   }
 
-  cambiarSeleccion(productoId: string, seleccionado: boolean): void {
+
+  cambiarSeleccion(
+    productoId: string,
+    seleccionado: boolean
+  ): void {
+
     if (seleccionado) {
+
       if (!this.productosSeleccionados.includes(productoId)) {
         this.productosSeleccionados.push(productoId);
       }
+
     } else {
+
       this.productosSeleccionados =
-        this.productosSeleccionados.filter(id => id !== productoId);
+        this.productosSeleccionados.filter(
+          id => id !== productoId
+        );
     }
   }
+
 
   crearMenu(): void {
 
     if (this.productosSeleccionados.length === 0) {
-      this.mensaje = 'Selecciona al menos un producto.';
+
+      this.mensaje =
+        'Selecciona al menos un producto.';
+
       return;
     }
 
@@ -106,38 +155,63 @@ export class MenuDiarioComponent implements OnInit {
     this.mensaje = '';
 
     const datos = {
+
       fecha: this.fecha,
-      productos: this.productosSeleccionados.map(id => ({
-        productoId: id
-      }))
+
+      productos: this.productosSeleccionados.map(
+        id => ({
+          productoId: id
+        })
+      )
     };
 
     this.http.post(
       this.menusUrl,
-      datos,
-      { headers: this.obtenerHeaders() }
+      datos
     ).subscribe({
+
       next: () => {
+
         this.cargando = false;
-        this.mensaje = 'Menú diario creado correctamente.';
+
+        this.mensaje =
+          'Menú diario creado correctamente.';
+
+        this.productosSeleccionados = [];
+
         this.cargarMenuHoy();
       },
+
       error: (error) => {
+
         this.cargando = false;
 
         if (error.status === 409) {
-          this.mensaje = 'Ya existe un menú para esta fecha.';
+
+          this.mensaje =
+            'Ya existe un menú para esta fecha.';
+
           return;
         }
 
-        this.mensaje = 'No se pudo crear el menú.';
+        this.mensaje =
+          error.error?.mensaje ||
+          'No se pudo crear el menú.';
       }
+
     });
   }
 
+
   cambiarDisponibilidad(producto: any): void {
 
-    const nuevaDisponibilidad = !producto.disponible;
+    if (!this.menuActual) {
+      this.mensaje = 'No existe un menú activo.';
+      return;
+    }
+
+    const nuevaDisponibilidad =
+      !producto.disponible;
 
     const url =
       `${this.menusUrl}/${this.menuActual.id}` +
@@ -146,19 +220,121 @@ export class MenuDiarioComponent implements OnInit {
 
     this.http.patch(
       url,
-      {},
-      { headers: this.obtenerHeaders() }
+      {}
     ).subscribe({
-      next: () => {
-        producto.disponible = nuevaDisponibilidad;
 
-        this.mensaje = nuevaDisponibilidad
-          ? 'Producto disponible nuevamente.'
-          : 'Producto marcado como agotado.';
+      next: () => {
+
+        producto.disponible =
+          nuevaDisponibilidad;
+
+        this.mensaje =
+          nuevaDisponibilidad
+            ? 'Producto disponible nuevamente.'
+            : 'Producto marcado como agotado.';
       },
-      error: () => {
-        this.mensaje = 'No se pudo cambiar la disponibilidad.';
+
+      error: (error) => {
+
+        this.mensaje =
+          error.error?.mensaje ||
+          'No se pudo cambiar la disponibilidad.';
       }
+
+    });
+  }
+
+
+  agregarProductoAlMenu(): void {
+
+    if (!this.menuActual) {
+
+      this.mensaje =
+        'No existe un menú activo.';
+
+      return;
+    }
+
+    if (!this.productoAgregarId) {
+
+      this.mensaje =
+        'Selecciona un producto.';
+
+      return;
+    }
+
+    this.http.post(
+      `${this.menusUrl}/${this.menuActual.id}/productos/${this.productoAgregarId}`,
+      {}
+    ).subscribe({
+
+      next: () => {
+
+        this.mensaje =
+          'Producto agregado al menú correctamente.';
+
+        this.productoAgregarId = '';
+
+        this.cargarMenuHoy();
+      },
+
+      error: (error) => {
+
+        this.mensaje =
+          error.error?.mensaje ||
+          'No se pudo agregar el producto al menú.';
+      }
+
+    });
+  }
+
+
+  quitarProductoDelMenu(producto: any): void {
+
+    if (!this.menuActual) {
+
+      this.mensaje =
+        'No existe un menú activo.';
+
+      return;
+    }
+
+    const confirmar = confirm(
+      `¿Deseas quitar "${producto.nombre}" del menú de hoy?`
+    );
+
+    if (!confirmar) {
+      return;
+    }
+
+    this.http.delete(
+      `${this.menusUrl}/${this.menuActual.id}/productos/${producto.productoId}`
+    ).subscribe({
+
+      next: () => {
+
+        this.mensaje =
+          'Producto quitado del menú correctamente.';
+
+        this.cargarMenuHoy();
+      },
+
+      error: (error) => {
+
+        if (error.status === 409) {
+
+          this.mensaje =
+            error.error?.mensaje ||
+            'Este producto ya tiene ventas y no puede quitarse.';
+
+          return;
+        }
+
+        this.mensaje =
+          error.error?.mensaje ||
+          'No se pudo quitar el producto del menú.';
+      }
+
     });
   }
 }

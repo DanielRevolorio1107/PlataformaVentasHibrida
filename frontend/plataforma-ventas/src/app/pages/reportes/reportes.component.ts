@@ -1,13 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
+import { environment } from '../../../enviroments/enviromet';
 
 @Component({
   selector: 'app-reportes',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink
+  ],
   templateUrl: './reportes.component.html',
   styleUrl: './reportes.component.scss'
 })
@@ -23,7 +28,7 @@ export class ReportesComponent implements OnInit {
   mensaje = '';
   cargando = false;
 
-  private apiUrl = 'http://localhost:5080/api/reportes';
+  private apiUrl = `${environment.apiUrl}/reportes`;
 
   constructor(private http: HttpClient) {}
 
@@ -34,7 +39,9 @@ export class ReportesComponent implements OnInit {
     this.consultarVentasPorFecha();
   }
 
+
   obtenerFechaLocal(): string {
+
     const hoy = new Date();
 
     const anio = hoy.getFullYear();
@@ -44,61 +51,65 @@ export class ReportesComponent implements OnInit {
     return `${anio}-${mes}-${dia}`;
   }
 
-  obtenerHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-  }
 
   cargarVentasHoy(): void {
 
     this.http.get<any>(
-      `${this.apiUrl}/ventas-hoy`,
-      { headers: this.obtenerHeaders() }
+      `${this.apiUrl}/ventas-hoy`
     ).subscribe({
+
       next: (respuesta) => {
         this.ventasHoy = respuesta;
       },
 
       error: () => {
-        this.mensaje = 'No se pudo cargar el resumen de ventas.';
+        this.mensaje =
+          'No se pudo cargar el resumen de ventas.';
       }
+
     });
   }
+
 
   cargarIngresosMetodoPago(): void {
 
     this.http.get<any>(
-      `${this.apiUrl}/ingresos-metodo-pago`,
-      { headers: this.obtenerHeaders() }
+      `${this.apiUrl}/ingresos-metodo-pago`
     ).subscribe({
+
       next: (respuesta) => {
-        this.ingresosMetodoPago = respuesta.resumen;
+        this.ingresosMetodoPago =
+          respuesta.resumen;
       },
 
       error: () => {
-        this.mensaje = 'No se pudieron cargar los ingresos por método de pago.';
+        this.mensaje =
+          'No se pudieron cargar los ingresos por método de pago.';
       }
+
     });
   }
+
 
   cargarProductosMasVendidos(): void {
 
     this.http.get<any>(
-      `${this.apiUrl}/productos-mas-vendidos`,
-      { headers: this.obtenerHeaders() }
+      `${this.apiUrl}/productos-mas-vendidos`
     ).subscribe({
+
       next: (respuesta) => {
-        this.productosMasVendidos = respuesta.productos;
+        this.productosMasVendidos =
+          respuesta.productos;
       },
 
       error: () => {
-        this.mensaje = 'No se pudieron cargar los productos más vendidos.';
+        this.mensaje =
+          'No se pudieron cargar los productos más vendidos.';
       }
+
     });
   }
+
 
   consultarVentasPorFecha(): void {
 
@@ -108,20 +119,28 @@ export class ReportesComponent implements OnInit {
     }
 
     this.cargando = true;
+    this.mensaje = '';
 
     this.http.get<any>(
-      `${this.apiUrl}/ventas-por-fecha?fecha=${this.fechaConsulta}`,
-      { headers: this.obtenerHeaders() }
+      `${this.apiUrl}/ventas-por-fecha?fecha=${this.fechaConsulta}`
     ).subscribe({
+
       next: (respuesta) => {
-        this.ventasPorFecha = respuesta.ventas;
+
+        this.ventasPorFecha =
+          respuesta.ventas;
+
         this.cargando = false;
       },
 
       error: () => {
-        this.mensaje = 'No se pudieron consultar las ventas de la fecha.';
+
+        this.mensaje =
+          'No se pudieron consultar las ventas de la fecha.';
+
         this.cargando = false;
       }
+
     });
   }
 }

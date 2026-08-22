@@ -1,13 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
+import { environment } from '../../../enviroments/enviromet';
 
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink
+  ],
   templateUrl: './usuarios.component.html',
   styleUrl: './usuarios.component.scss'
 })
@@ -27,8 +32,8 @@ export class UsuariosComponent implements OnInit {
     rolId: ''
   };
 
-  private usuariosUrl = 'http://localhost:5080/api/usuarios';
-  private rolesUrl = 'http://localhost:5080/api/estado/base-datos';
+  private usuariosUrl = `${environment.apiUrl}/usuarios`;
+  private rolesUrl = `${environment.apiUrl}/estado/base-datos`;
 
   constructor(private http: HttpClient) {}
 
@@ -37,19 +42,13 @@ export class UsuariosComponent implements OnInit {
     this.cargarRoles();
   }
 
-  obtenerHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-  }
 
   cargarUsuarios(): void {
+
     this.http.get<any[]>(
-      this.usuariosUrl,
-      { headers: this.obtenerHeaders() }
+      this.usuariosUrl
     ).subscribe({
+
       next: (usuarios) => {
         this.usuarios = usuarios;
       },
@@ -57,14 +56,17 @@ export class UsuariosComponent implements OnInit {
       error: () => {
         this.mensaje = 'No se pudieron cargar los usuarios.';
       }
+
     });
   }
 
+
   cargarRoles(): void {
+
     this.http.get<any>(
-      this.rolesUrl,
-      { headers: this.obtenerHeaders() }
+      this.rolesUrl
     ).subscribe({
+
       next: (respuesta) => {
         this.roles = respuesta.roles;
       },
@@ -72,8 +74,10 @@ export class UsuariosComponent implements OnInit {
       error: () => {
         this.mensaje = 'No se pudieron cargar los roles.';
       }
+
     });
   }
+
 
   crearUsuario(): void {
 
@@ -88,7 +92,8 @@ export class UsuariosComponent implements OnInit {
     }
 
     if (this.nuevoUsuario.password.length < 8) {
-      this.mensaje = 'La contraseña debe tener al menos 8 caracteres.';
+      this.mensaje =
+        'La contraseña debe tener al menos 8 caracteres.';
       return;
     }
 
@@ -102,11 +107,14 @@ export class UsuariosComponent implements OnInit {
 
     this.http.post(
       this.usuariosUrl,
-      this.nuevoUsuario,
-      { headers: this.obtenerHeaders() }
+      this.nuevoUsuario
     ).subscribe({
+
       next: () => {
-        this.mensaje = 'Usuario creado correctamente.';
+
+        this.mensaje =
+          'Usuario creado correctamente.';
+
         this.cargando = false;
         this.mostrarFormulario = false;
 
@@ -121,56 +129,85 @@ export class UsuariosComponent implements OnInit {
       },
 
       error: (error) => {
+
         this.cargando = false;
 
         if (error.status === 409) {
-          this.mensaje = 'El nombre de usuario ya existe.';
+          this.mensaje =
+            'El nombre de usuario ya existe.';
           return;
         }
 
-        this.mensaje = 'No se pudo crear el usuario.';
+        if (error.status === 403) {
+          this.mensaje =
+            'No tienes permisos para crear usuarios.';
+          return;
+        }
+
+        this.mensaje =
+          'No se pudo crear el usuario.';
       }
+
     });
   }
 
+
   desactivarUsuario(usuario: any): void {
 
-    if (!confirm(`¿Desactivar al usuario "${usuario.nombreUsuario}"?`)) {
+    const confirmar = confirm(
+      `¿Desactivar al usuario "${usuario.nombreUsuario}"?`
+    );
+
+    if (!confirmar) {
       return;
     }
 
     this.http.patch(
       `${this.usuariosUrl}/${usuario.id}/desactivar`,
-      {},
-      { headers: this.obtenerHeaders() }
+      {}
     ).subscribe({
+
       next: () => {
-        this.mensaje = 'Usuario desactivado correctamente.';
+
+        this.mensaje =
+          'Usuario desactivado correctamente.';
+
         this.cargarUsuarios();
       },
 
       error: (error) => {
+
         this.mensaje =
-          error.error?.mensaje || 'No se pudo desactivar el usuario.';
+          error.error?.mensaje ||
+          'No se pudo desactivar el usuario.';
       }
+
     });
   }
+
 
   activarUsuario(usuario: any): void {
 
     this.http.patch(
       `${this.usuariosUrl}/${usuario.id}/activar`,
-      {},
-      { headers: this.obtenerHeaders() }
+      {}
     ).subscribe({
+
       next: () => {
-        this.mensaje = 'Usuario activado correctamente.';
+
+        this.mensaje =
+          'Usuario activado correctamente.';
+
         this.cargarUsuarios();
       },
 
-      error: () => {
-        this.mensaje = 'No se pudo activar el usuario.';
+      error: (error) => {
+
+        this.mensaje =
+          error.error?.mensaje ||
+          'No se pudo activar el usuario.';
       }
+
     });
   }
 }

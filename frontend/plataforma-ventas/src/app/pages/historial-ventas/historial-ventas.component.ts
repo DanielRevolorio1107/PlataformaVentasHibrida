@@ -1,13 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
+import { environment } from '../../../enviroments/enviromet';
 
 @Component({
   selector: 'app-historial-ventas',
   standalone: true,
   imports: [
     CommonModule,
+    RouterLink
   ],
   templateUrl: './historial-ventas.component.html',
   styleUrl: './historial-ventas.component.scss'
@@ -19,7 +21,7 @@ export class HistorialVentasComponent implements OnInit {
   mensaje = '';
   cargando = false;
 
-  private apiUrl = 'http://localhost:5080/api/ventas';
+  private apiUrl = `${environment.apiUrl}/ventas`;
 
   constructor(private http: HttpClient) {}
 
@@ -27,14 +29,6 @@ export class HistorialVentasComponent implements OnInit {
     this.cargarVentas();
   }
 
-  obtenerHeaders(): HttpHeaders {
-
-    const token = localStorage.getItem('token');
-
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-  }
 
   cargarVentas(): void {
 
@@ -42,17 +36,13 @@ export class HistorialVentasComponent implements OnInit {
     this.mensaje = '';
 
     this.http.get<any[]>(
-      this.apiUrl,
-      {
-        headers: this.obtenerHeaders()
-      }
+      this.apiUrl
     ).subscribe({
 
       next: (ventas) => {
 
         this.ventas = ventas;
         this.cargando = false;
-
       },
 
       error: (error) => {
@@ -71,10 +61,14 @@ export class HistorialVentasComponent implements OnInit {
     });
   }
 
+
   anularVenta(venta: any): void {
 
     if (venta.estado === 'ANULADA') {
-      this.mensaje = 'Esta venta ya se encuentra anulada.';
+
+      this.mensaje =
+        'Esta venta ya se encuentra anulada.';
+
       return;
     }
 
@@ -88,10 +82,7 @@ export class HistorialVentasComponent implements OnInit {
 
     this.http.patch(
       `${this.apiUrl}/${venta.id}/anular`,
-      {},
-      {
-        headers: this.obtenerHeaders()
-      }
+      {}
     ).subscribe({
 
       next: () => {
@@ -105,14 +96,18 @@ export class HistorialVentasComponent implements OnInit {
       error: (error) => {
 
         if (error.status === 409) {
+
           this.mensaje =
             'La venta ya se encuentra anulada.';
+
           return;
         }
 
         if (error.status === 403) {
+
           this.mensaje =
             'No tienes permisos para anular ventas.';
+
           return;
         }
 

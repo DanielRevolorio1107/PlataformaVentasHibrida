@@ -195,4 +195,140 @@ public class MenusController : ControllerBase
             disponible
         });
     }
+
+    [Authorize(Roles = "Administrador")]
+    [HttpPost("{menuId:guid}/productos/{productoId:guid}")]
+    public async Task<IActionResult> AgregarProducto(
+    Guid menuId,
+    Guid productoId)
+    {
+        var menu = await _context.MenusDiarios
+            .FirstOrDefaultAsync(m =>
+                m.Id == menuId &&
+                m.Activo);
+
+        if (menu == null)
+        {
+            return NotFound(new
+            {
+                mensaje = "Menú no encontrado."
+            });
+        }
+
+        var producto = await _context.Productos
+            .FirstOrDefaultAsync(p =>
+                p.Id == productoId &&
+                p.Activo);
+
+        if (producto == null)
+        {
+            return NotFound(new
+            {
+                mensaje = "Producto no encontrado o inactivo."
+            });
+        }
+
+        var detalleExistente = await _context.MenuDetalles
+            .FirstOrDefaultAsync(d =>
+                d.MenuDiarioId == menuId &&
+                d.ProductoId == productoId);
+
+        if (detalleExistente != null)
+        {
+            
+            detalleExistente.Disponible = true;
+
+            menu.FechaActualizacion = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                mensaje = "El producto ya pertenecía al menú y fue habilitado nuevamente."
+            });
+        }
+
+        var detalle = new MenuDetalle
+        {
+            Id = Guid.NewGuid(),
+            MenuDiarioId = menuId,
+            ProductoId = productoId,
+            Disponible = true
+        };
+
+        _context.MenuDetalles.Add(detalle);
+
+        menu.FechaActualizacion = DateTime.Now;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            mensaje = "Producto agregado al menú correctamente.",
+            productoId = producto.Id,
+            producto = producto.Nombre
+        });
+    }
+
+    [Authorize(Roles = "Administrador")]
+    [HttpDelete("{menuId:guid}/productos/{productoId:guid}")]
+    public async Task<IActionResult> QuitarProducto(
+    Guid menuId,
+    Guid productoId)
+    {
+        var menu = await _context.MenusDiarios
+            .FirstOrDefaultAsync(m =>
+                m.Id == menuId &&
+                m.Activo);
+
+        if (menu == null)
+        {
+            return NotFound(new
+            {
+                mensaje = "Menú no encontrado."
+            });
+        }
+
+        var detalle = await _context.MenuDetalles
+            .FirstOrDefaultAsync(d =>
+                d.MenuDiarioId == menuId &&
+                d.ProductoId == productoId);
+
+        if (detalle == null)
+        {
+            return NotFound(new
+            {
+                mensaje = "El producto no pertenece al menú."
+            });
+        }
+
+        var inicioDia = menu.Fecha.Date;
+        var finDia = inicioDia.AddDays(1);
+
+        var tieneVentas = await _context.DetalleVentas
+            .AnyAsync(d =>
+                d.ProductoId == productoId &&
+                d.Venta.FechaVenta >= inicioDia &&
+                d.Venta.FechaVenta < finDia &&
+                d.Venta.Estado == "REGISTRADA");
+
+        if (tieneVentas)
+        {
+            return Conflict(new
+            {
+                mensaje = "El producto ya tiene ventas registradas este día. Márcalo como agotado en lugar de quitarlo."
+            });
+        }
+
+        _context.MenuDetalles.Remove(detalle);
+
+        menu.FechaActualizacion = DateTime.Now;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            mensaje = "Producto quitado del menú correctamente."
+        });
+    }
 }

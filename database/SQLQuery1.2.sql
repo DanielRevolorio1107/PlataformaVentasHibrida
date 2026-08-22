@@ -1,0 +1,3 @@
+SELECT TOP 10 *
+FROM Ventas
+ORDER BY FechaVenta DESC;

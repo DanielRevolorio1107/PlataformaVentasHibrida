@@ -107,3 +107,70 @@ button {
   text-align: center;
   color: #666;
 }
+.agregar-producto-menu {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+
+  h3 {
+    margin: 0 0 15px;
+    color: #1f2937;
+  }
+}
+
+.agregar-producto-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+
+  select {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    font-size: 14px;
+    background: white;
+  }
+
+  button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 7px;
+    background: #1f2937;
+    color: white;
+    cursor: pointer;
+
+    &:hover {
+      background: #111827;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.sin-productos {
+  margin-top: 10px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.acciones-producto {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-quitar {
+  border: none;
+  border-radius: 7px;
+  background: #dc2626;
+  color: white;
+  cursor: pointer;
+
+  &:hover {
+    background: #b91c1c;
+  }
+}

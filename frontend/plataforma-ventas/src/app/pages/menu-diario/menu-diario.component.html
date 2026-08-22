@@ -1,34 +1,57 @@
 <div class="menu-page">
 
+  <!-- ENCABEZADO -->
   <header class="page-header">
+
     <div>
       <h1>Menú diario</h1>
       <p>Administra los platos disponibles para el almuerzo.</p>
     </div>
 
-    <a routerLink="/dashboard">
+    <a
+      routerLink="/dashboard"
+      class="volver"
+    >
       Volver al inicio
     </a>
+
   </header>
 
+
+  <!-- TARJETA PRINCIPAL -->
   <div class="menu-card">
 
-    <!-- SI YA EXISTE MENÚ -->
     <div *ngIf="menuActual; else crearMenuTemplate">
 
-      <h2>Menú de hoy</h2>
+      <div class="menu-header">
 
-      <p>
-        {{ menuActual.fecha | date:'dd/MM/yyyy' }}
-      </p>
+        <div>
+          <h2>Menú de hoy</h2>
 
+          <p>
+            {{ menuActual.fecha | date:'dd/MM/yyyy' }}
+          </p>
+        </div>
+
+        <span class="cantidad-productos">
+          {{ menuActual.productos.length }} producto(s)
+        </span>
+
+      </div>
+
+
+      <!-- PRODUCTOS DEL MENÚ -->
       <div
         class="producto"
         *ngFor="let producto of menuActual.productos"
+        [class.producto-agotado]="!producto.disponible"
       >
 
-        <div>
-          <strong>{{ producto.nombre }}</strong>
+        <div class="producto-info">
+
+          <strong>
+            {{ producto.nombre }}
+          </strong>
 
           <span *ngIf="producto.descripcion">
             {{ producto.descripcion }}
@@ -37,37 +60,131 @@
           <small>
             Q {{ producto.precio | number:'1.2-2' }}
           </small>
+
         </div>
 
-        <button
-          type="button"
-          (click)="cambiarDisponibilidad(producto)"
+
+          <button
+            type="button"
+            class="btn-disponibilidad"
+            [class.disponible]="producto.disponible"
+            [class.agotado]="!producto.disponible"
+            (click)="cambiarDisponibilidad(producto)"
+          >
+            {{ producto.disponible ? 'Disponible' : 'Agotado' }}
+      </button>
+
+  <button
+    type="button"
+    class="btn-quitar"
+    (click)="quitarProductoDelMenu(producto)"
+  >
+    Quitar
+  </button>
+
+      </div>
+
+
+      <!-- AGREGAR PRODUCTO AL MENÚ -->
+      <div class="agregar-producto-menu">
+
+        <h3>Agregar producto al menú</h3>
+
+        <p class="descripcion-seccion">
+          Puedes agregar otro producto sin necesidad de crear un menú nuevo.
+        </p>
+
+
+        <div
+          class="agregar-producto-form"
+          *ngIf="productosFueraDelMenu.length > 0"
         >
-          {{ producto.disponible ? 'Disponible' : 'Agotado' }}
-        </button>
+
+          <select
+            [(ngModel)]="productoAgregarId"
+          >
+
+            <option value="">
+              Selecciona un producto
+            </option>
+
+            <option
+              *ngFor="let producto of productosFueraDelMenu"
+              [value]="producto.id"
+            >
+              {{ producto.nombre }}
+              -
+              Q {{ producto.precio | number:'1.2-2' }}
+            </option>
+
+          </select>
+
+
+          <button
+            type="button"
+            class="btn-agregar"
+            (click)="agregarProductoAlMenu()"
+            [disabled]="!productoAgregarId"
+          >
+            Agregar
+          </button>
+
+        </div>
+
+
+        <p
+          class="sin-productos"
+          *ngIf="productosFueraDelMenu.length === 0"
+        >
+          Todos los productos activos ya forman parte del menú de hoy.
+        </p>
 
       </div>
 
     </div>
 
 
+
     <!-- SI NO EXISTE MENÚ -->
     <ng-template #crearMenuTemplate>
 
+      <div class="crear-menu-header">
+
+        <div>
+          <h2>Crear menú del día</h2>
+
+          <p>
+            Selecciona los productos que estarán disponibles para el almuerzo.
+          </p>
+        </div>
+
+      </div>
+
+
+      <!-- FECHA -->
       <div class="fecha">
-        <label for="fecha">Fecha del menú</label>
+
+        <label for="fecha">
+          Fecha del menú
+        </label>
 
         <input
           id="fecha"
           type="date"
           [(ngModel)]="fecha"
         >
+
       </div>
 
-      <h2>Seleccionar productos</h2>
+
+      <!-- PRODUCTOS -->
+      <h3 class="titulo-productos">
+        Seleccionar productos
+      </h3>
+
 
       <div
-        class="producto"
+        class="producto producto-seleccion"
         *ngFor="let producto of productos"
       >
 
@@ -80,9 +197,15 @@
           )"
         >
 
-        <label [for]="producto.id">
 
-          <strong>{{ producto.nombre }}</strong>
+        <label
+          [for]="producto.id"
+          class="producto-info"
+        >
+
+          <strong>
+            {{ producto.nombre }}
+          </strong>
 
           <span *ngIf="producto.descripcion">
             {{ producto.descripcion }}
@@ -96,13 +219,29 @@
 
       </div>
 
-      <button
-        type="button"
-        (click)="crearMenu()"
-        [disabled]="cargando"
+
+      <!-- SIN PRODUCTOS -->
+      <div
+        class="sin-productos"
+        *ngIf="productos.length === 0"
       >
-        {{ cargando ? 'Guardando...' : 'Crear menú del día' }}
-      </button>
+        No hay productos activos disponibles.
+      </div>
+
+
+      <!-- CREAR MENÚ -->
+      <div class="acciones-menu">
+
+        <button
+          type="button"
+          class="btn-crear-menu"
+          (click)="crearMenu()"
+          [disabled]="cargando || productosSeleccionados.length === 0"
+        >
+          {{ cargando ? 'Guardando...' : 'Crear menú del día' }}
+        </button>
+
+      </div>
 
     </ng-template>
 

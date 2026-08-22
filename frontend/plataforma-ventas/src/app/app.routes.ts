@@ -7,6 +7,9 @@ import { VentasComponent } from './pages/ventas/ventas.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { ReportesComponent } from './pages/reportes/reportes.component';
 import { HistorialVentasComponent } from './pages/historial-ventas/historial-ventas.component';
+import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
+
 
 export const routes: Routes = [
   {
@@ -15,31 +18,38 @@ export const routes: Routes = [
   },
   {
     path: 'dashboard',
-    component: DashboardComponent
+    component: DashboardComponent,
+    canActivate: [authGuard]
   },
   {
     path: 'productos',
-    component: ProductosComponent
+    component: ProductosComponent,
+    canActivate: [authGuard]
   },
   {
     path: 'menu-diario',
-    component: MenuDiarioComponent
- },
+    component: MenuDiarioComponent,
+    canActivate: [authGuard, adminGuard]
+  },
  {
   path: 'ventas',
-  component: VentasComponent
+  component: VentasComponent,
+  canActivate: [authGuard]
 },
 {
   path: 'usuarios',
-  component: UsuariosComponent
+  component: UsuariosComponent,
+  canActivate: [authGuard, adminGuard]
 },
 {
   path: 'reportes',
-  component: ReportesComponent
+  component: ReportesComponent,
+  canActivate: [authGuard]
 },
 {
   path: 'historial-ventas',
-  component: HistorialVentasComponent
+  component: HistorialVentasComponent,
+  canActivate: [authGuard, adminGuard]
 },
   {
     path: '',

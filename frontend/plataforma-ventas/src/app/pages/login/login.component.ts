@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { environment } from '../../../enviroments/enviromet';
 
 @Component({
   selector: 'app-login',
@@ -19,7 +20,7 @@ export class LoginComponent {
   mensaje = '';
   cargando = false;
 
-  private apiUrl = 'http://localhost:5080/api/usuarios/login';
+  private apiUrl = `${environment.apiUrl}/usuarios/login`;
 
   constructor(private http: HttpClient, private router: Router) {}
 

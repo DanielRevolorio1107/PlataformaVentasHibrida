@@ -1,1 +1,3 @@
-Select * from productos
+SELECT *
+FROM MenusDiarios
+ORDER BY Fecha DESC;
