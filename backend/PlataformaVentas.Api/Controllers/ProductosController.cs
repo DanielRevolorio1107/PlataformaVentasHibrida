@@ -4,8 +4,10 @@ using PlataformaVentas.Api.Data;
 using PlataformaVentas.Api.DTOs.Productos;
 using PlataformaVentas.Api.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Text.Json;
 
 namespace PlataformaVentas.Api.Controllers;
+
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
@@ -33,6 +35,34 @@ public class ProductosController : ControllerBase
         };
 
         _context.Productos.Add(producto);
+
+        var payload = JsonSerializer.Serialize(new
+        {
+            producto.Id,
+            producto.Nombre,
+            producto.Descripcion,
+            producto.Precio,
+            producto.Activo,
+            producto.FechaCreacion,
+            producto.FechaActualizacion
+        });
+
+        var pendienteSincronizacion = new ColaSincronizacion
+        {
+            Id = Guid.NewGuid(),
+            Entidad = "Producto",
+            EntidadId = producto.Id,
+            TipoOperacion = "CREAR",
+            Payload = payload,
+            Estado = "PENDIENTE",
+            Intentos = 0,
+            FechaCreacion = DateTime.Now
+        };
+
+        _context.ColaSincronizacion.Add(
+            pendienteSincronizacion
+        );
+
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(
@@ -41,7 +71,7 @@ public class ProductosController : ControllerBase
             producto
         );
     }
-   
+
     [HttpGet]
     public async Task<IActionResult> ObtenerProductos()
     {
@@ -54,9 +84,12 @@ public class ProductosController : ControllerBase
 
     [Authorize(Roles = "Administrador")]
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> EditarProducto(Guid id, EditarProductoDto dto)
+    public async Task<IActionResult> EditarProducto(
+        Guid id,
+        EditarProductoDto dto)
     {
-        var producto = await _context.Productos.FindAsync(id);
+        var producto =
+            await _context.Productos.FindAsync(id);
 
         if (producto == null)
         {
@@ -72,6 +105,11 @@ public class ProductosController : ControllerBase
         producto.Activo = dto.Activo;
         producto.FechaActualizacion = DateTime.Now;
 
+        var pendiente =
+            CrearActualizacionProducto(producto);
+
+        _context.ColaSincronizacion.Add(pendiente);
+
         await _context.SaveChangesAsync();
 
         return Ok(producto);
@@ -81,7 +119,8 @@ public class ProductosController : ControllerBase
     [HttpPatch("{id:guid}/desactivar")]
     public async Task<IActionResult> DesactivarProducto(Guid id)
     {
-        var producto = await _context.Productos.FindAsync(id);
+        var producto =
+            await _context.Productos.FindAsync(id);
 
         if (producto == null)
         {
@@ -93,6 +132,11 @@ public class ProductosController : ControllerBase
 
         producto.Activo = false;
         producto.FechaActualizacion = DateTime.Now;
+
+        var pendiente =
+            CrearActualizacionProducto(producto);
+
+        _context.ColaSincronizacion.Add(pendiente);
 
         await _context.SaveChangesAsync();
 
@@ -109,7 +153,8 @@ public class ProductosController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> EliminarProducto(Guid id)
     {
-        var producto = await _context.Productos.FindAsync(id);
+        var producto =
+            await _context.Productos.FindAsync(id);
 
         if (producto == null)
         {
@@ -119,16 +164,50 @@ public class ProductosController : ControllerBase
             });
         }
 
-        var tieneVentas = await _context.DetalleVentas
-            .AnyAsync(d => d.ProductoId == id);
+        var tieneVentas =
+            await _context.DetalleVentas
+                .AnyAsync(d => d.ProductoId == id);
 
         if (tieneVentas)
         {
             return Conflict(new
             {
-                mensaje = "El producto no puede eliminarse porque ya está relacionado con ventas. Puede desactivarlo."
+                mensaje =
+                    "El producto no puede eliminarse porque ya está relacionado con ventas. Puede desactivarlo."
             });
         }
+
+        var estaEnMenu =
+            await _context.MenuDetalles
+                .AnyAsync(m => m.ProductoId == id);
+
+        if (estaEnMenu)
+        {
+            return Conflict(new
+            {
+                mensaje =
+                    "El producto no puede eliminarse porque está relacionado con un menú diario. Puede desactivarlo."
+            });
+        }
+
+        var payload = JsonSerializer.Serialize(new
+        {
+            Id = producto.Id
+        });
+
+        var pendiente = new ColaSincronizacion
+        {
+            Id = Guid.NewGuid(),
+            Entidad = "Producto",
+            EntidadId = producto.Id,
+            TipoOperacion = "ELIMINAR",
+            Payload = payload,
+            Estado = "PENDIENTE",
+            Intentos = 0,
+            FechaCreacion = DateTime.Now
+        };
+
+        _context.ColaSincronizacion.Add(pendiente);
 
         _context.Productos.Remove(producto);
 
@@ -144,7 +223,8 @@ public class ProductosController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> ObtenerProducto(Guid id)
     {
-        var producto = await _context.Productos.FindAsync(id);
+        var producto =
+            await _context.Productos.FindAsync(id);
 
         if (producto == null)
         {
@@ -161,7 +241,8 @@ public class ProductosController : ControllerBase
     [HttpPatch("{id:guid}/activar")]
     public async Task<IActionResult> ActivarProducto(Guid id)
     {
-        var producto = await _context.Productos.FindAsync(id);
+        var producto =
+            await _context.Productos.FindAsync(id);
 
         if (producto == null)
         {
@@ -174,6 +255,11 @@ public class ProductosController : ControllerBase
         producto.Activo = true;
         producto.FechaActualizacion = DateTime.Now;
 
+        var pendiente =
+            CrearActualizacionProducto(producto);
+
+        _context.ColaSincronizacion.Add(pendiente);
+
         await _context.SaveChangesAsync();
 
         return Ok(new
@@ -183,5 +269,31 @@ public class ProductosController : ControllerBase
             producto.Nombre,
             producto.Activo
         });
+    }
+
+    private ColaSincronizacion CrearActualizacionProducto(
+        Producto producto)
+    {
+        var payload = JsonSerializer.Serialize(new
+        {
+            producto.Id,
+            producto.Nombre,
+            producto.Descripcion,
+            producto.Precio,
+            producto.Activo,
+            producto.FechaActualizacion
+        });
+
+        return new ColaSincronizacion
+        {
+            Id = Guid.NewGuid(),
+            Entidad = "Producto",
+            EntidadId = producto.Id,
+            TipoOperacion = "ACTUALIZAR",
+            Payload = payload,
+            Estado = "PENDIENTE",
+            Intentos = 0,
+            FechaCreacion = DateTime.Now
+        };
     }
 }

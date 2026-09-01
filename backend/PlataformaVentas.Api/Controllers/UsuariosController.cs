@@ -9,6 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using System.Text.Json;
 
 namespace PlataformaVentas.Api.Controllers;
 
@@ -21,9 +22,9 @@ public class UsuariosController : ControllerBase
     private readonly IPasswordHasher<Usuario> _passwordHasher;
 
     public UsuariosController(
-     AppDbContext context,
-     IPasswordHasher<Usuario> passwordHasher,
-     IConfiguration configuration)
+        AppDbContext context,
+        IPasswordHasher<Usuario> passwordHasher,
+        IConfiguration configuration)
     {
         _context = context;
         _passwordHasher = passwordHasher;
@@ -69,9 +70,42 @@ public class UsuariosController : ControllerBase
         };
 
         usuario.PasswordHash =
-            _passwordHasher.HashPassword(usuario, dto.Password);
+            _passwordHasher.HashPassword(
+                usuario,
+                dto.Password
+            );
 
         _context.Usuarios.Add(usuario);
+
+        var payload = JsonSerializer.Serialize(new
+        {
+            usuario.Id,
+            usuario.RolId,
+            usuario.NombreCompleto,
+            usuario.NombreUsuario,
+            usuario.PasswordHash,
+            usuario.Activo,
+            usuario.FechaCreacion,
+            usuario.FechaActualizacion
+        });
+
+        var pendienteSincronizacion =
+            new ColaSincronizacion
+            {
+                Id = Guid.NewGuid(),
+                Entidad = "Usuario",
+                EntidadId = usuario.Id,
+                TipoOperacion = "CREAR",
+                Payload = payload,
+                Estado = "PENDIENTE",
+                Intentos = 0,
+                FechaCreacion = DateTime.Now
+            };
+
+        _context.ColaSincronizacion.Add(
+            pendienteSincronizacion
+        );
+
         await _context.SaveChangesAsync();
 
         return StatusCode(201, new
@@ -104,45 +138,72 @@ public class UsuariosController : ControllerBase
             });
         }
 
-        var resultado = _passwordHasher.VerifyHashedPassword(
-            usuario,
-            usuario.PasswordHash,
-            dto.Password
-        );
+        var resultado =
+            _passwordHasher.VerifyHashedPassword(
+                usuario,
+                usuario.PasswordHash,
+                dto.Password
+            );
 
-        if (resultado == PasswordVerificationResult.Failed)
+        if (resultado ==
+            PasswordVerificationResult.Failed)
         {
             return Unauthorized(new
             {
                 mensaje = "Usuario o contraseña incorrectos"
             });
         }
+
         var claims = new[]
-{
-    new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-    new Claim(ClaimTypes.Name, usuario.NombreUsuario),
-    new Claim(ClaimTypes.Role, usuario.Rol.Nombre)
-};
+        {
+            new Claim(
+                ClaimTypes.NameIdentifier,
+                usuario.Id.ToString()
+            ),
+            new Claim(
+                ClaimTypes.Name,
+                usuario.NombreUsuario
+            ),
+            new Claim(
+                ClaimTypes.Role,
+                usuario.Rol.Nombre
+            )
+        };
 
-        var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+        var key =
+            new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(
+                    _configuration["Jwt:Key"]!
+                )
+            );
 
-        var credentials = new SigningCredentials(
-            key,
-            SecurityAlgorithms.HmacSha256);
+        var credentials =
+            new SigningCredentials(
+                key,
+                SecurityAlgorithms.HmacSha256
+            );
 
-        var expiracion = DateTime.UtcNow.AddMinutes(
-            _configuration.GetValue<int>("Jwt:ExpirationMinutes"));
+        var expiracion =
+            DateTime.UtcNow.AddMinutes(
+                _configuration.GetValue<int>(
+                    "Jwt:ExpirationMinutes"
+                )
+            );
 
-        var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
-            claims: claims,
-            expires: expiracion,
-            signingCredentials: credentials
-        );
+        var token =
+            new JwtSecurityToken(
+                issuer:
+                    _configuration["Jwt:Issuer"],
+                audience:
+                    _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: expiracion,
+                signingCredentials: credentials
+            );
 
-        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+        var tokenString =
+            new JwtSecurityTokenHandler()
+                .WriteToken(token);
 
         return Ok(new
         {
@@ -182,9 +243,11 @@ public class UsuariosController : ControllerBase
 
     [Authorize(Roles = "Administrador")]
     [HttpPatch("{id:guid}/desactivar")]
-    public async Task<IActionResult> DesactivarUsuario(Guid id)
+    public async Task<IActionResult> DesactivarUsuario(
+        Guid id)
     {
-        var usuario = await _context.Usuarios.FindAsync(id);
+        var usuario =
+            await _context.Usuarios.FindAsync(id);
 
         if (usuario == null)
         {
@@ -194,25 +257,38 @@ public class UsuariosController : ControllerBase
             });
         }
 
-        var usuarioActualIdTexto = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var usuarioActualIdTexto =
+            User.FindFirst(
+                ClaimTypes.NameIdentifier
+            )?.Value;
 
-        if (Guid.TryParse(usuarioActualIdTexto, out Guid usuarioActualId)
+        if (Guid.TryParse(
+                usuarioActualIdTexto,
+                out Guid usuarioActualId)
             && usuarioActualId == id)
         {
             return BadRequest(new
             {
-                mensaje = "No puede desactivar su propio usuario."
+                mensaje =
+                    "No puede desactivar su propio usuario."
             });
         }
 
         usuario.Activo = false;
-        usuario.FechaActualizacion = DateTime.Now;
+        usuario.FechaActualizacion =
+            DateTime.Now;
+
+        var pendiente =
+            CrearActualizacionUsuario(usuario);
+
+        _context.ColaSincronizacion.Add(pendiente);
 
         await _context.SaveChangesAsync();
 
         return Ok(new
         {
-            mensaje = "Usuario desactivado correctamente",
+            mensaje =
+                "Usuario desactivado correctamente",
             usuario.Id,
             usuario.NombreUsuario,
             usuario.Activo
@@ -221,9 +297,11 @@ public class UsuariosController : ControllerBase
 
     [Authorize(Roles = "Administrador")]
     [HttpPatch("{id:guid}/activar")]
-    public async Task<IActionResult> ActivarUsuario(Guid id)
+    public async Task<IActionResult> ActivarUsuario(
+        Guid id)
     {
-        var usuario = await _context.Usuarios.FindAsync(id);
+        var usuario =
+            await _context.Usuarios.FindAsync(id);
 
         if (usuario == null)
         {
@@ -234,16 +312,46 @@ public class UsuariosController : ControllerBase
         }
 
         usuario.Activo = true;
-        usuario.FechaActualizacion = DateTime.Now;
+        usuario.FechaActualizacion =
+            DateTime.Now;
+
+        var pendiente =
+            CrearActualizacionUsuario(usuario);
+
+        _context.ColaSincronizacion.Add(pendiente);
 
         await _context.SaveChangesAsync();
 
         return Ok(new
         {
-            mensaje = "Usuario activado correctamente",
+            mensaje =
+                "Usuario activado correctamente",
             usuario.Id,
             usuario.NombreUsuario,
             usuario.Activo
         });
+    }
+
+    private ColaSincronizacion CrearActualizacionUsuario(
+        Usuario usuario)
+    {
+        var payload = JsonSerializer.Serialize(new
+        {
+            usuario.Id,
+            usuario.Activo,
+            usuario.FechaActualizacion
+        });
+
+        return new ColaSincronizacion
+        {
+            Id = Guid.NewGuid(),
+            Entidad = "Usuario",
+            EntidadId = usuario.Id,
+            TipoOperacion = "ACTUALIZAR",
+            Payload = payload,
+            Estado = "PENDIENTE",
+            Intentos = 0,
+            FechaCreacion = DateTime.Now
+        };
     }
 }

@@ -5,6 +5,7 @@ using PlataformaVentas.Api.Data;
 using PlataformaVentas.Api.DTOs.Menus;
 using PlataformaVentas.Api.Models;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace PlataformaVentas.Api.Controllers;
 
@@ -108,6 +109,39 @@ public class MenusController : ControllerBase
 
         _context.MenusDiarios.Add(menu);
 
+        var payload = JsonSerializer.Serialize(new
+        {
+            menu.Id,
+            menu.Fecha,
+            menu.UsuarioId,
+            menu.Activo,
+            menu.FechaCreacion,
+            menu.FechaActualizacion,
+            Detalles = menu.Detalles.Select(d => new
+            {
+                d.Id,
+                d.ProductoId,
+                d.Disponible
+            }).ToList()
+        });
+
+        var pendienteSincronizacion =
+            new ColaSincronizacion
+            {
+                Id = Guid.NewGuid(),
+                Entidad = "Menu",
+                EntidadId = menu.Id,
+                TipoOperacion = "CREAR",
+                Payload = payload,
+                Estado = "PENDIENTE",
+                Intentos = 0,
+                FechaCreacion = DateTime.Now
+            };
+
+        _context.ColaSincronizacion.Add(
+            pendienteSincronizacion
+        );
+
         await _context.SaveChangesAsync();
 
         return StatusCode(201, new
@@ -158,13 +192,24 @@ public class MenusController : ControllerBase
     [Authorize(Roles = "Administrador")]
     [HttpPatch("{menuId:guid}/productos/{productoId:guid}/disponibilidad")]
     public async Task<IActionResult> CambiarDisponibilidad(
-    Guid menuId,
-    Guid productoId,
-    bool disponible)
+        Guid menuId,
+        Guid productoId,
+        bool disponible)
     {
-        var detalle = await _context.MenuDetalles
-            .FirstOrDefaultAsync(d =>
-                d.MenuDiarioId == menuId &&
+        var menu = await _context.MenusDiarios
+            .Include(m => m.Detalles)
+            .FirstOrDefaultAsync(m => m.Id == menuId);
+
+        if (menu == null)
+        {
+            return NotFound(new
+            {
+                mensaje = "Menú no encontrado."
+            });
+        }
+
+        var detalle = menu.Detalles
+            .FirstOrDefault(d =>
                 d.ProductoId == productoId);
 
         if (detalle == null)
@@ -176,13 +221,12 @@ public class MenusController : ControllerBase
         }
 
         detalle.Disponible = disponible;
+        menu.FechaActualizacion = DateTime.Now;
 
-        var menu = await _context.MenusDiarios.FindAsync(menuId);
+        var pendiente =
+            CrearActualizacionMenu(menu);
 
-        if (menu != null)
-        {
-            menu.FechaActualizacion = DateTime.Now;
-        }
+        _context.ColaSincronizacion.Add(pendiente);
 
         await _context.SaveChangesAsync();
 
@@ -199,10 +243,11 @@ public class MenusController : ControllerBase
     [Authorize(Roles = "Administrador")]
     [HttpPost("{menuId:guid}/productos/{productoId:guid}")]
     public async Task<IActionResult> AgregarProducto(
-    Guid menuId,
-    Guid productoId)
+        Guid menuId,
+        Guid productoId)
     {
         var menu = await _context.MenusDiarios
+            .Include(m => m.Detalles)
             .FirstOrDefaultAsync(m =>
                 m.Id == menuId &&
                 m.Activo);
@@ -228,23 +273,26 @@ public class MenusController : ControllerBase
             });
         }
 
-        var detalleExistente = await _context.MenuDetalles
-            .FirstOrDefaultAsync(d =>
-                d.MenuDiarioId == menuId &&
+        var detalleExistente = menu.Detalles
+            .FirstOrDefault(d =>
                 d.ProductoId == productoId);
 
         if (detalleExistente != null)
         {
-            
             detalleExistente.Disponible = true;
-
             menu.FechaActualizacion = DateTime.Now;
+
+            var pendiente =
+                CrearActualizacionMenu(menu);
+
+            _context.ColaSincronizacion.Add(pendiente);
 
             await _context.SaveChangesAsync();
 
             return Ok(new
             {
-                mensaje = "El producto ya pertenecía al menú y fue habilitado nuevamente."
+                mensaje =
+                    "El producto ya pertenecía al menú y fue habilitado nuevamente."
             });
         }
 
@@ -256,9 +304,16 @@ public class MenusController : ControllerBase
             Disponible = true
         };
 
-        _context.MenuDetalles.Add(detalle);
+        menu.Detalles.Add(detalle);
 
         menu.FechaActualizacion = DateTime.Now;
+
+        var pendienteNuevo =
+            CrearActualizacionMenu(menu);
+
+        _context.ColaSincronizacion.Add(
+            pendienteNuevo
+        );
 
         await _context.SaveChangesAsync();
 
@@ -273,10 +328,11 @@ public class MenusController : ControllerBase
     [Authorize(Roles = "Administrador")]
     [HttpDelete("{menuId:guid}/productos/{productoId:guid}")]
     public async Task<IActionResult> QuitarProducto(
-    Guid menuId,
-    Guid productoId)
+        Guid menuId,
+        Guid productoId)
     {
         var menu = await _context.MenusDiarios
+            .Include(m => m.Detalles)
             .FirstOrDefaultAsync(m =>
                 m.Id == menuId &&
                 m.Activo);
@@ -289,9 +345,8 @@ public class MenusController : ControllerBase
             });
         }
 
-        var detalle = await _context.MenuDetalles
-            .FirstOrDefaultAsync(d =>
-                d.MenuDiarioId == menuId &&
+        var detalle = menu.Detalles
+            .FirstOrDefault(d =>
                 d.ProductoId == productoId);
 
         if (detalle == null)
@@ -316,13 +371,21 @@ public class MenusController : ControllerBase
         {
             return Conflict(new
             {
-                mensaje = "El producto ya tiene ventas registradas este día. Márcalo como agotado en lugar de quitarlo."
+                mensaje =
+                    "El producto ya tiene ventas registradas este día. Márcalo como agotado en lugar de quitarlo."
             });
         }
+
+        menu.Detalles.Remove(detalle);
 
         _context.MenuDetalles.Remove(detalle);
 
         menu.FechaActualizacion = DateTime.Now;
+
+        var pendiente =
+            CrearActualizacionMenu(menu);
+
+        _context.ColaSincronizacion.Add(pendiente);
 
         await _context.SaveChangesAsync();
 
@@ -330,5 +393,37 @@ public class MenusController : ControllerBase
         {
             mensaje = "Producto quitado del menú correctamente."
         });
+    }
+
+    private ColaSincronizacion CrearActualizacionMenu(
+        MenuDiario menu)
+    {
+        var payload = JsonSerializer.Serialize(new
+        {
+            menu.Id,
+            menu.Fecha,
+            menu.UsuarioId,
+            menu.Activo,
+            menu.FechaCreacion,
+            menu.FechaActualizacion,
+            Detalles = menu.Detalles.Select(d => new
+            {
+                d.Id,
+                d.ProductoId,
+                d.Disponible
+            }).ToList()
+        });
+
+        return new ColaSincronizacion
+        {
+            Id = Guid.NewGuid(),
+            Entidad = "Menu",
+            EntidadId = menu.Id,
+            TipoOperacion = "ACTUALIZAR",
+            Payload = payload,
+            Estado = "PENDIENTE",
+            Intentos = 0,
+            FechaCreacion = DateTime.Now
+        };
     }
 }
