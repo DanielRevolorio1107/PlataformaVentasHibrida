@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
     public DbSet<DetalleVenta> DetalleVentas { get; set; }
     public DbSet<MenuDiario> MenusDiarios { get; set; }
     public DbSet<MenuDetalle> MenuDetalles { get; set; }
+    public DbSet<ColaSincronizacion> ColaSincronizacion { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -62,5 +63,28 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<MenuDetalle>()
             .HasIndex(m => new { m.MenuDiarioId, m.ProductoId })
             .IsUnique();
+
+        modelBuilder.Entity<ColaSincronizacion>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+
+            entity.Property(c => c.Entidad)
+                .HasMaxLength(50)
+                .IsRequired();
+
+            entity.Property(c => c.TipoOperacion)
+                .HasMaxLength(20)
+                .IsRequired();
+
+            entity.Property(c => c.Estado)
+                .HasMaxLength(20)
+                .IsRequired();
+
+            entity.Property(c => c.Payload)
+                .HasColumnType("nvarchar(max)");
+
+            entity.Property(c => c.UltimoError)
+                .HasMaxLength(1000);
+        });
     }
 }

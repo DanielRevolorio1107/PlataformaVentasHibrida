@@ -5,6 +5,7 @@ using PlataformaVentas.Api.Data;
 using PlataformaVentas.Api.DTOs.Ventas;
 using PlataformaVentas.Api.Models;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace PlataformaVentas.Api.Controllers;
 
@@ -24,7 +25,8 @@ public class VentasController : ControllerBase
     public async Task<IActionResult> CrearVenta(CrearVentaDto dto)
     {
         // Obtener el usuario directamente del JWT
-        var usuarioIdTexto = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var usuarioIdTexto =
+            User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (!Guid.TryParse(usuarioIdTexto, out Guid usuarioId))
         {
@@ -34,25 +36,31 @@ public class VentasController : ControllerBase
             });
         }
 
-        // Verificar método de pago
         var metodoPagoExiste = await _context.MetodosPago
-            .AnyAsync(m => m.Id == dto.MetodoPagoId && m.Activo);
+            .AnyAsync(m =>
+                m.Id == dto.MetodoPagoId &&
+                m.Activo);
 
         if (!metodoPagoExiste)
         {
             return BadRequest(new
             {
-                mensaje = "El método de pago no existe o está inactivo."
+                mensaje =
+                    "El método de pago no existe o está inactivo."
             });
         }
 
-        if (dto.Detalles == null || dto.Detalles.Count == 0)
+        if (dto.Detalles == null ||
+            dto.Detalles.Count == 0)
         {
             return BadRequest(new
             {
-                mensaje = "La venta debe contener al menos un producto."
+                mensaje =
+                    "La venta debe contener al menos un producto."
             });
         }
+
+
         var hoy = DateTime.Today;
 
         var menuHoy = await _context.MenusDiarios
@@ -65,9 +73,11 @@ public class VentasController : ControllerBase
         {
             return BadRequest(new
             {
-                mensaje = "No existe un menú activo para hoy."
+                mensaje =
+                    "No existe un menú activo para hoy."
             });
         }
+
 
         var productosRepetidos = dto.Detalles
             .GroupBy(d => d.ProductoId)
@@ -77,7 +87,8 @@ public class VentasController : ControllerBase
         {
             return BadRequest(new
             {
-                mensaje = "No puede repetir el mismo producto en la venta."
+                mensaje =
+                    "No puede repetir el mismo producto en la venta."
             });
         }
 
@@ -86,17 +97,18 @@ public class VentasController : ControllerBase
             .Select(d => d.ProductoId)
             .ToHashSet();
 
+
         foreach (var item in dto.Detalles)
         {
             if (!productosDisponibles.Contains(item.ProductoId))
             {
                 return BadRequest(new
                 {
-                    mensaje = $"El producto {item.ProductoId} no está disponible en el menú de hoy."
+                    mensaje =
+                        $"El producto {item.ProductoId} no está disponible en el menú de hoy."
                 });
             }
         }
-
         var venta = new Venta
         {
             Id = Guid.NewGuid(),
@@ -121,11 +133,15 @@ public class VentasController : ControllerBase
             {
                 return BadRequest(new
                 {
-                    mensaje = $"El producto {item.ProductoId} no existe o está inactivo."
+                    mensaje =
+                        $"El producto {item.ProductoId} no existe o está inactivo."
                 });
             }
 
-            var subtotal = producto.Precio * item.Cantidad;
+
+            var subtotal =
+                producto.Precio * item.Cantidad;
+
 
             var detalle = new DetalleVenta
             {
@@ -137,16 +153,68 @@ public class VentasController : ControllerBase
                 Subtotal = subtotal
             };
 
+
             venta.Detalles.Add(detalle);
 
             total += subtotal;
         }
 
+
         venta.Total = total;
 
         _context.Ventas.Add(venta);
 
+        var payload = JsonSerializer.Serialize(new
+        {
+            venta.Id,
+            venta.UsuarioId,
+            venta.MetodoPagoId,
+            venta.FechaVenta,
+            venta.Total,
+            venta.Estado,
+            venta.Observaciones,
+
+            Detalles = venta.Detalles.Select(detalle => new
+            {
+                detalle.Id,
+                detalle.ProductoId,
+                detalle.Cantidad,
+                detalle.PrecioUnitario,
+                detalle.Subtotal
+            })
+        });
+
+
+     
+        var pendienteSincronizacion =
+            new ColaSincronizacion
+            {
+                Id = Guid.NewGuid(),
+
+                Entidad = "Venta",
+
+                EntidadId = venta.Id,
+
+                TipoOperacion = "CREAR",
+
+                Payload = payload,
+
+                Estado = "PENDIENTE",
+
+                Intentos = 0,
+
+                FechaCreacion = DateTime.Now
+            };
+
+
+        _context.ColaSincronizacion.Add(
+            pendienteSincronizacion
+        );
+
+
+   
         await _context.SaveChangesAsync();
+
 
         return StatusCode(201, new
         {
@@ -160,15 +228,22 @@ public class VentasController : ControllerBase
         });
     }
 
+
+
     [HttpGet]
     public async Task<IActionResult> ObtenerVentas()
     {
         var ventas = await _context.Ventas
+
             .Include(v => v.Usuario)
+
             .Include(v => v.MetodoPago)
+
             .Include(v => v.Detalles)
                 .ThenInclude(d => d.Producto)
+
             .OrderByDescending(v => v.FechaVenta)
+
             .Select(v => new
             {
                 v.Id,
@@ -176,8 +251,13 @@ public class VentasController : ControllerBase
                 v.Total,
                 v.Estado,
                 v.Observaciones,
-                Usuario = v.Usuario.NombreCompleto,
-                MetodoPago = v.MetodoPago.Nombre,
+
+                Usuario =
+                    v.Usuario.NombreCompleto,
+
+                MetodoPago =
+                    v.MetodoPago.Nombre,
+
                 Detalles = v.Detalles.Select(d => new
                 {
                     Producto = d.Producto.Nombre,
@@ -186,20 +266,28 @@ public class VentasController : ControllerBase
                     d.Subtotal
                 })
             })
+
             .ToListAsync();
+
 
         return Ok(ventas);
     }
+
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> ObtenerVentaPorId(Guid id)
     {
         var venta = await _context.Ventas
+
             .Include(v => v.Usuario)
+
             .Include(v => v.MetodoPago)
+
             .Include(v => v.Detalles)
                 .ThenInclude(d => d.Producto)
+
             .Where(v => v.Id == id)
+
             .Select(v => new
             {
                 v.Id,
@@ -207,8 +295,13 @@ public class VentasController : ControllerBase
                 v.Total,
                 v.Estado,
                 v.Observaciones,
-                Usuario = v.Usuario.NombreCompleto,
-                MetodoPago = v.MetodoPago.Nombre,
+
+                Usuario =
+                    v.Usuario.NombreCompleto,
+
+                MetodoPago =
+                    v.MetodoPago.Nombre,
+
                 Detalles = v.Detalles.Select(d => new
                 {
                     Producto = d.Producto.Nombre,
@@ -217,7 +310,9 @@ public class VentasController : ControllerBase
                     d.Subtotal
                 })
             })
+
             .FirstOrDefaultAsync();
+
 
         if (venta == null)
         {
@@ -227,14 +322,17 @@ public class VentasController : ControllerBase
             });
         }
 
+
         return Ok(venta);
     }
+
 
     [Authorize(Roles = "Administrador")]
     [HttpPatch("{id:guid}/anular")]
     public async Task<IActionResult> AnularVenta(Guid id)
     {
-        var venta = await _context.Ventas.FindAsync(id);
+        var venta = await _context.Ventas
+            .FirstOrDefaultAsync(v => v.Id == id);
 
         if (venta == null)
         {
@@ -252,8 +350,36 @@ public class VentasController : ControllerBase
             });
         }
 
+        // Cambiar estado local
         venta.Estado = "ANULADA";
 
+        // Como cambió, debe volver a sincronizarse
+        venta.Sincronizado = false;
+        venta.FechaSincronizacion = null;
+
+        // Crear información que después enviaremos a la nube
+        var payload = JsonSerializer.Serialize(new
+        {
+            venta.Id,
+            venta.Estado
+        });
+
+        // Registrar el cambio en la cola
+        var pendienteSincronizacion = new ColaSincronizacion
+        {
+            Id = Guid.NewGuid(),
+            Entidad = "Venta",
+            EntidadId = venta.Id,
+            TipoOperacion = "ACTUALIZAR",
+            Payload = payload,
+            Estado = "PENDIENTE",
+            Intentos = 0,
+            FechaCreacion = DateTime.Now
+        };
+
+        _context.ColaSincronizacion.Add(
+            pendienteSincronizacion
+        );
         await _context.SaveChangesAsync();
 
         return Ok(new
