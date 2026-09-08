@@ -11,7 +11,6 @@ import { environment } from '../../../enviroments/enviromet';
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink
   ],
   templateUrl: './ventas.component.html',
   styleUrl: './ventas.component.scss'

@@ -1,83 +1,352 @@
-<div class="dashboard">
+<section class="dashboard-page">
 
-  <aside class="sidebar">
+  <header class="page-header">
 
-    <div class="logo">
-      <h2>Ventas</h2>
-    </div>
+    <span class="breadcrumb">
+      PANEL DE CONTROL
+    </span>
 
-    <nav>
-      <button>Inicio</button>
-      <button routerLink="/ventas">
-        Ventas
-      </button>
-      <button routerLink="/productos">
-        Productos
-      </button>
-      <button
-        *ngIf="usuario?.rol === 'Administrador'"
-        routerLink="/menu-diario">
-        Menú diario
-      </button>
-      <button routerLink="/reportes">
-       Reportes
-      </button>
-      <button
-        *ngIf="usuario?.rol === 'Administrador'"
-        routerLink="/usuarios"
-      >
-         Usuarios
-      </button>
-      <button
-      *ngIf="usuario?.rol === 'Administrador'"
-       routerLink="/historial-ventas"
-      >
-        Historial de ventas
-    </button>
-    </nav>
+    <h1>
+      Dashboard
+    </h1>
 
-    <button
-      class="logout"
-      (click)="cerrarSesion()"
-    >
-      Cerrar sesión
-    </button>
+    <p>
+      Resumen general de la actividad del negocio.
+    </p>
 
-  </aside>
+  </header>
 
-  <main class="content">
 
-    <header>
-      <div>
-        <h1>Panel principal</h1>
-        <p>Gestión y control de ventas</p>
+  <!-- MÉTRICAS -->
+  <section class="stats-grid">
+
+    <article class="stat-card">
+
+      <div class="stat-top">
+
+        <div class="stat-icon income">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 1v2a7 7 0 1 0 7 7h2A9 9 0 1 1 12 1Zm1 4h8v8h-2V8.4l-6.3 6.3-1.4-1.4L17.6 7H13V5Z"
+            />
+          </svg>
+        </div>
+
+        <span>
+          Ingresos de hoy
+        </span>
+
       </div>
 
-      <div class="user-info">
-        <strong>{{ usuario?.nombreCompleto }}</strong>
-        <span>{{ usuario?.rol }}</span>
+      <div class="stat-value">
+        Q {{ totalIngresos | number:'1.2-2' }}
       </div>
-    </header>
 
-    <section class="cards">
+      <div class="stat-footer success">
+        Actividad del día
+      </div>
 
-      <div class="card">
-        <h3>Ingresos de hoy</h3>
-        <p>Q {{ totalIngresos | number:'1.2-2' }}</p>
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-top">
+
+        <div class="stat-icon sales">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M4 4h16v16H4V4Zm2 2v12h12V6H6Zm2 8h2v2H8v-2Zm0-6h8v2H8V8Zm0 3h8v2H8v-2Z"
+            />
+          </svg>
         </div>
 
-        <div class="card">
-        <h3>Ventas de hoy</h3>
-        <p>{{ totalVentas }}</p>
+        <span>
+          Ventas de hoy
+        </span>
+
+      </div>
+
+      <div class="stat-value">
+        {{ totalVentas }}
+      </div>
+
+      <div class="stat-footer">
+        Transacciones registradas
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-top">
+
+        <div class="stat-icon products">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="m12 2 9 5-9 5-9-5 9-5Zm-7 8.5 6 3.3v7L5 17.5v-7Zm14 0v7l-6 3.3v-7l6-3.3Z"
+            />
+          </svg>
         </div>
 
-      <div class="card">
-        <h3>Productos activos</h3>
-        <p>{{ totalProductos }}</p>
+        <span>
+          Productos activos
+        </span>
+
+      </div>
+
+      <div class="stat-value">
+        {{ totalProductos }}
+      </div>
+
+      <div class="stat-footer">
+        Disponibles en catálogo
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-top">
+
+        <div class="stat-icon ticket">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M3 4h18v16l-3-2-3 2-3-2-3 2-3-2-3 2V4Zm4 4v2h10V8H7Zm0 4v2h7v-2H7Z"
+            />
+          </svg>
         </div>
 
-    </section>
+        <span>
+          Ticket promedio
+        </span>
 
-  </main>
+      </div>
 
+      <div class="stat-value">
+        Q {{ ticketPromedio | number:'1.2-2' }}
+      </div>
+
+      <div class="stat-footer">
+        Promedio por venta
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- PARTE INFERIOR -->
+  <section class="dashboard-grid">
+
+    <article class="panel">
+
+      <div class="panel-header">
+        <div>
+          <h2>
+            Accesos rápidos
+          </h2>
+
+          <p>
+            Operaciones frecuentes
+          </p>
+        </div>
+      </div>
+
+
+      <div class="quick-actions">
+
+        <a
+          routerLink="/ventas"
+          class="quick-action"
+        >
+
+          <div class="quick-icon">
+            +
+          </div>
+
+          <div class="quick-text">
+            <strong>
+              Nueva venta
+            </strong>
+
+            <span>
+              Registrar una operación
+            </span>
+          </div>
+
+          <span class="arrow">
+            →
+          </span>
+
+        </a>
+
+
+        <a
+          *ngIf="usuario?.rol === 'Administrador'"
+          routerLink="/menu-diario"
+          class="quick-action"
+        >
+
+          <div class="quick-icon">
+  <svg viewBox="0 0 24 24">
+    <path
+      d="M4 3h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 4v2h12V7H6Zm0 4v2h12v-2H6Zm0 4v2h8v-2H6Z"
+    />
+  </svg>
 </div>
+
+          <div class="quick-text">
+            <strong>
+              Menú diario
+            </strong>
+
+            <span>
+              Administrar productos del día
+            </span>
+          </div>
+
+          <span class="arrow">
+            →
+          </span>
+
+        </a>
+
+
+        <a
+          routerLink="/reportes"
+          class="quick-action"
+        >
+
+      <div class="quick-icon">
+  <svg viewBox="0 0 24 24">
+    <path
+      d="M4 20V10h4v10H4Zm6 0V4h4v16h-4Zm6 0v-7h4v7h-4Z"
+    />
+  </svg>
+</div>
+
+          <div class="quick-text">
+            <strong>
+              Ver reportes
+            </strong>
+
+            <span>
+              Consultar resultados
+            </span>
+          </div>
+
+          <span class="arrow">
+            →
+          </span>
+
+        </a>
+
+      </div>
+
+    </article>
+
+
+    <article class="panel system-panel">
+
+      <div class="panel-header">
+
+        <div>
+          <h2>
+            Estado del sistema
+          </h2>
+
+          <p>
+            Plataforma híbrida
+          </p>
+        </div>
+
+        <span
+          class="status-badge"
+          [class.offline]="!estaEnLinea"
+        >
+          {{
+            estaEnLinea
+              ? 'OPERATIVO'
+              : 'SIN CONEXIÓN'
+          }}
+        </span>
+
+      </div>
+
+
+      <div class="system-status">
+
+        <div class="system-item">
+
+          <span
+            class="system-dot"
+            [class.warning]="!estaEnLinea"
+          ></span>
+
+          <div>
+            <strong>
+              Conexión a Internet
+            </strong>
+
+            <span>
+              {{
+                estaEnLinea
+                  ? 'Conectada'
+                  : 'No disponible'
+              }}
+            </span>
+          </div>
+
+        </div>
+
+
+        <div class="system-item">
+
+          <span class="system-dot"></span>
+
+          <div>
+            <strong>
+              Base de datos local
+            </strong>
+
+            <span>
+              Disponible
+            </span>
+          </div>
+
+        </div>
+
+
+        <div class="system-item">
+
+          <span
+            class="system-dot"
+            [class.warning]="!estaEnLinea"
+          ></span>
+
+          <div>
+            <strong>
+              Sincronización
+            </strong>
+
+            <span>
+              {{
+                estaEnLinea
+                  ? 'Servicio disponible'
+                  : 'Pendiente hasta recuperar conexión'
+              }}
+            </span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </article>
+
+  </section>
+
+</section>

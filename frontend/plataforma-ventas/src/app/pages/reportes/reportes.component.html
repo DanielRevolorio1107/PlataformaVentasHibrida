@@ -1,90 +1,699 @@
-<div class="reportes-page">
+<section class="reportes-page">
 
-  <!-- ENCABEZADO -->
   <header class="page-header">
+
     <div>
-      <h1>Reportes</h1>
-      <p>Consulta y análisis de las ventas registradas.</p>
+
+      <span class="breadcrumb">
+        ANÁLISIS DE VENTAS
+      </span>
+
+      <h1>
+        Reportes
+      </h1>
+
+      <p>
+        Consulta los resultados del negocio
+        y analiza el comportamiento de las ventas.
+      </p>
+
     </div>
 
-    <a routerLink="/dashboard" class="volver">
-      Volver al inicio
-    </a>
+    <div class="fecha-reporte">
+
+      <span>
+        Resumen actual
+      </span>
+
+      <strong>
+        {{
+          ventasHoy?.fecha
+            | date:'dd/MM/yyyy'
+        }}
+      </strong>
+
+    </div>
+
   </header>
 
 
-  <!-- RESUMEN DEL DÍA -->
-  <section class="resumen">
+  <div
+    class="mensaje"
+    *ngIf="mensaje"
+  >
 
-    <div class="resumen-card">
-      <span>Ventas de hoy</span>
-
-      <strong>
-        {{ ventasHoy?.totalVentas || 0 }}
-      </strong>
+    <div class="mensaje-icon">
+      i
     </div>
 
+    <span>
+      {{ mensaje }}
+    </span>
 
-    <div class="resumen-card">
-      <span>Ingresos de hoy</span>
-
-      <strong>
-        Q {{ (ventasHoy?.totalIngresos || 0) | number:'1.2-2' }}
-      </strong>
-    </div>
+  </div>
 
 
-    <div class="resumen-card">
-      <span>Fecha</span>
+  <section class="stats-grid">
 
-      <strong>
-        {{ ventasHoy?.fecha | date:'dd/MM/yyyy' }}
-      </strong>
-    </div>
+    <article class="stat-card">
+
+      <div class="stat-icon ventas">
+
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M4 4h16v16H4V4Zm2 2v12h12V6H6Zm2 8h2v2H8v-2Zm0-6h8v2H8V8Zm0 3h8v2H8v-2Z"
+          />
+        </svg>
+
+      </div>
+
+      <div>
+
+        <span>
+          Ventas de hoy
+        </span>
+
+        <strong>
+          {{
+            ventasHoy?.totalVentas || 0
+          }}
+        </strong>
+
+        <small>
+          Transacciones registradas
+        </small>
+
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon ingresos">
+
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M12 1v2a7 7 0 1 0 7 7h2A9 9 0 1 1 12 1Zm1 4h8v8h-2V8.4l-6.3 6.3-1.4-1.4L17.6 7H13V5Z"
+          />
+        </svg>
+
+      </div>
+
+      <div>
+
+        <span>
+          Ingresos de hoy
+        </span>
+
+        <strong>
+          Q {{
+            (ventasHoy?.totalIngresos || 0)
+              | number:'1.2-2'
+          }}
+        </strong>
+
+        <small>
+          Total generado
+        </small>
+
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon ticket">
+
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M3 4h18v16l-3-2-3 2-3-2-3 2-3-2-3 2V4Zm4 4v2h10V8H7Zm0 4v2h7v-2H7Z"
+          />
+        </svg>
+
+      </div>
+
+      <div>
+
+        <span>
+          Ticket promedio
+        </span>
+
+        <strong>
+          Q {{
+            ticketPromedio
+              | number:'1.2-2'
+          }}
+        </strong>
+
+        <small>
+          Promedio por venta
+        </small>
+
+      </div>
+
+    </article>
 
   </section>
 
 
-  <!-- INGRESOS POR MÉTODO DE PAGO -->
-  <section class="reporte-card">
+  <section class="overview-grid">
 
-    <div class="card-header">
-      <div>
-        <h2>Ingresos por método de pago</h2>
-        <p>Distribución de los ingresos registrados durante el día.</p>
+    <article class="report-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <h2>
+            Ingresos por método de pago
+          </h2>
+
+          <p>
+            Distribución de los ingresos
+            registrados durante el día.
+          </p>
+
+        </div>
+
+        <div class="header-icon payment">
+
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M3 5h18v14H3V5Zm2 2v2h14V7H5Zm0 5v5h14v-5H5Zm2 2h5v2H7v-2Z"
+            />
+          </svg>
+
+        </div>
+
       </div>
+
+
+      <div
+        class="payment-list"
+        *ngIf="
+          ingresosMetodoPago.length > 0
+        "
+      >
+
+        <div
+          class="payment-item"
+          *ngFor="
+            let metodo
+            of ingresosMetodoPago
+          "
+        >
+
+          <div class="payment-top">
+
+            <div>
+
+              <div class="payment-avatar">
+                {{
+                  metodo.metodoPago
+                    ? metodo.metodoPago.charAt(0)
+                    : 'P'
+                }}
+              </div>
+
+              <div class="payment-info">
+
+                <strong>
+                  {{ metodo.metodoPago }}
+                </strong>
+
+                <span>
+                  {{
+                    metodo.cantidadVentas
+                  }}
+
+                  {{
+                    metodo.cantidadVentas === 1
+                      ? 'venta'
+                      : 'ventas'
+                  }}
+                </span>
+
+              </div>
+
+            </div>
+
+            <div class="payment-total">
+
+              <strong>
+                Q {{
+                  metodo.totalIngresos
+                    | number:'1.2-2'
+                }}
+              </strong>
+
+              <span>
+                {{
+                  porcentajeMetodo(metodo)
+                    | number:'1.0-0'
+                }}%
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="progress-track">
+
+            <div
+              class="progress-value"
+              [style.width.%]="
+                porcentajeMetodo(metodo)
+              "
+            ></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="empty-state"
+        *ngIf="
+          ingresosMetodoPago.length === 0
+        "
+      >
+
+        <div class="empty-icon">
+
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M3 5h18v14H3V5Zm2 4h14V7H5v2Z"
+            />
+          </svg>
+
+        </div>
+
+        <strong>
+          Sin ingresos registrados
+        </strong>
+
+        <span>
+          No existen ingresos para hoy.
+        </span>
+
+      </div>
+
+    </article>
+
+
+    <article class="report-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <h2>
+            Productos más vendidos
+          </h2>
+
+          <p>
+            Ranking de productos
+            por unidades vendidas.
+          </p>
+
+        </div>
+
+        <div class="header-icon ranking">
+
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M4 20V10h4v10H4Zm6 0V4h4v16h-4Zm6 0v-7h4v7h-4Z"
+            />
+          </svg>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="ranking-list"
+        *ngIf="
+          productosMasVendidos.length > 0
+        "
+      >
+
+        <div
+          class="ranking-item"
+          *ngFor="
+            let producto
+            of productosMasVendidos;
+            let i = index
+          "
+        >
+
+          <div class="ranking-position">
+
+            <span
+              [class.top-one]="i === 0"
+            >
+              {{ i + 1 }}
+            </span>
+
+          </div>
+
+
+          <div class="ranking-data">
+
+            <div class="ranking-header">
+
+              <div>
+
+                <strong>
+                  {{ producto.producto }}
+                </strong>
+
+                <span>
+                  {{
+                    producto.cantidadVendida
+                  }}
+                  unidades
+                </span>
+
+              </div>
+
+              <strong class="ranking-total">
+                Q {{
+                  producto.totalGenerado
+                    | number:'1.2-2'
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="ranking-progress">
+
+              <div
+                [style.width.%]="
+                  porcentajeProducto(producto)
+                "
+              ></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="empty-state"
+        *ngIf="
+          productosMasVendidos.length === 0
+        "
+      >
+
+        <div class="empty-icon">
+
+          <svg viewBox="0 0 24 24">
+            <path
+              d="m12 2 9 5-9 5-9-5 9-5Zm-9 8 9 5 9-5v7l-9 5-9-5v-7Z"
+            />
+          </svg>
+
+        </div>
+
+        <strong>
+          Sin productos vendidos
+        </strong>
+
+        <span>
+          Todavía no existen ventas para hoy.
+        </span>
+
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <section class="report-card consulta-card">
+
+    <div class="consulta-header">
+
+      <div>
+
+        <h2>
+          Consultar ventas por fecha
+        </h2>
+
+        <p>
+          Selecciona un día para consultar
+          las ventas registradas.
+        </p>
+
+      </div>
+
+
+      <div class="busqueda-fecha">
+
+        <div class="date-input">
+
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M7 2h2v2h6V2h2v2h3a2 2 0 0 1 2 2v14H2V6a2 2 0 0 1 2-2h3V2Zm13 8H4v8h16v-8ZM4 8h16V6H4v2Z"
+            />
+          </svg>
+
+          <input
+            id="fechaConsulta"
+            type="date"
+            [(ngModel)]="fechaConsulta"
+          >
+
+        </div>
+
+
+        <button
+          type="button"
+          class="btn-consultar"
+          (click)="
+            consultarVentasPorFecha()
+          "
+          [disabled]="cargando"
+        >
+
+          <svg
+            *ngIf="!cargando"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="m9.5 3a6.5 6.5 0 1 1-4.6 11.1L2 17l1.4 1.4 2.9-2.9A6.5 6.5 0 0 1 9.5 3Zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z"
+            />
+          </svg>
+
+          {{
+            cargando
+              ? 'Consultando...'
+              : 'Consultar'
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="consulta-stats">
+
+      <div>
+
+        <span>
+          Ventas encontradas
+        </span>
+
+        <strong>
+          {{ ventasPorFecha.length }}
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <span>
+          Registradas
+        </span>
+
+        <strong class="success">
+          {{
+            ventasRegistradasConsulta
+          }}
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <span>
+          Anuladas
+        </span>
+
+        <strong class="danger">
+          {{
+            ventasAnuladasConsulta
+          }}
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <span>
+          Total consultado
+        </span>
+
+        <strong>
+          Q {{
+            totalIngresosConsulta
+              | number:'1.2-2'
+          }}
+        </strong>
+
+      </div>
+
     </div>
 
 
     <div
       class="tabla-contenedor"
-      *ngIf="ingresosMetodoPago.length > 0"
+      *ngIf="
+        ventasPorFecha.length > 0
+      "
     >
 
       <table>
 
         <thead>
+
           <tr>
-            <th>Método de pago</th>
-            <th>Ventas</th>
-            <th>Ingresos</th>
+
+            <th>
+              Fecha y hora
+            </th>
+
+            <th>
+              Usuario
+            </th>
+
+            <th>
+              Método de pago
+            </th>
+
+            <th>
+              Total
+            </th>
+
+            <th>
+              Estado
+            </th>
+
           </tr>
+
         </thead>
+
 
         <tbody>
 
-          <tr *ngFor="let metodo of ingresosMetodoPago">
-
-            <td class="nombre">
-              {{ metodo.metodoPago }}
-            </td>
+          <tr
+            *ngFor="
+              let venta
+              of ventasPorFecha
+            "
+          >
 
             <td>
-              {{ metodo.cantidadVentas }}
+
+              <div class="fecha-cell">
+
+                <strong>
+                  {{
+                    venta.fechaVenta
+                      | date:'dd/MM/yyyy'
+                  }}
+                </strong>
+
+                <span>
+                  {{
+                    venta.fechaVenta
+                      | date:'HH:mm'
+                  }}
+                </span>
+
+              </div>
+
             </td>
 
+
+            <td>
+
+              <div class="user-cell">
+
+                <div class="user-avatar">
+                  {{
+                    venta.usuario
+                      ? venta.usuario.charAt(0)
+                      : 'U'
+                  }}
+                </div>
+
+                <strong>
+                  {{ venta.usuario }}
+                </strong>
+
+              </div>
+
+            </td>
+
+
+            <td>
+              {{ venta.metodoPago }}
+            </td>
+
+
             <td class="dinero">
-              Q {{ metodo.totalIngresos | number:'1.2-2' }}
+              Q {{
+                venta.total
+                  | number:'1.2-2'
+              }}
+            </td>
+
+
+            <td>
+
+              <span
+                class="estado-venta"
+                [class.registrada]="
+                  venta.estado === 'REGISTRADA'
+                "
+                [class.anulada]="
+                  venta.estado === 'ANULADA'
+                "
+              >
+
+                <span></span>
+
+                {{ venta.estado }}
+
+              </span>
+
             </td>
 
           </tr>
@@ -97,192 +706,34 @@
 
 
     <div
-      class="sin-datos"
-      *ngIf="ingresosMetodoPago.length === 0"
+      class="empty-table"
+      *ngIf="
+        ventasPorFecha.length === 0 &&
+        !cargando
+      "
     >
-      No hay ingresos registrados hoy.
+
+      <div class="empty-icon">
+
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M7 2h2v2h6V2h2v2h3a2 2 0 0 1 2 2v14H2V6a2 2 0 0 1 2-2h3V2Zm13 8H4v8h16v-8ZM4 8h16V6H4v2Z"
+          />
+        </svg>
+
+      </div>
+
+      <strong>
+        Sin ventas para esta fecha
+      </strong>
+
+      <span>
+        Selecciona otra fecha
+        para realizar una consulta.
+      </span>
+
     </div>
 
   </section>
-
-
-  <!-- CONSULTA POR FECHA -->
-  <!-- CONSULTA DE VENTAS POR FECHA -->
-<section class="reporte-card">
-
-  <div class="card-header">
-    <div>
-      <h2>Consultar ventas por fecha</h2>
-      <p>Selecciona una fecha para consultar las ventas registradas.</p>
-    </div>
-  </div>
-
-  <div class="busqueda-fecha">
-
-    <div class="form-group">
-      <label for="fechaConsulta">
-        Fecha
-      </label>
-
-      <input
-        id="fechaConsulta"
-        type="date"
-        [(ngModel)]="fechaConsulta"
-      >
-    </div>
-
-    <button
-      type="button"
-      class="btn-primary"
-      (click)="consultarVentasPorFecha()"
-      [disabled]="cargando"
-    >
-      {{ cargando ? 'Consultando...' : 'Consultar' }}
-    </button>
-
-  </div>
-
-  <div
-    class="resultado-header"
-    *ngIf="ventasPorFecha.length > 0"
-  >
-    <strong>
-      {{ ventasPorFecha.length }} venta(s) encontrada(s)
-    </strong>
-  </div>
-
-  <div
-    class="tabla-contenedor"
-    *ngIf="ventasPorFecha.length > 0"
-  >
-
-    <table>
-
-      <thead>
-        <tr>
-          <th>Fecha y hora</th>
-          <th>Usuario</th>
-          <th>Método de pago</th>
-          <th>Total</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-
-      <tbody>
-
-        <tr *ngFor="let venta of ventasPorFecha">
-
-          <td>
-            {{ venta.fechaVenta | date:'dd/MM/yyyy HH:mm' }}
-          </td>
-
-          <td class="nombre">
-            {{ venta.usuario }}
-          </td>
-
-          <td>
-            {{ venta.metodoPago }}
-          </td>
-
-          <td class="dinero">
-            Q {{ venta.total | number:'1.2-2' }}
-          </td>
-
-          <td>
-            <span
-              class="estado-venta"
-              [class.registrada]="venta.estado === 'REGISTRADA'"
-              [class.anulada]="venta.estado === 'ANULADA'"
-            >
-              {{ venta.estado }}
-            </span>
-          </td>
-
-        </tr>
-
-      </tbody>
-
-    </table>
-
-  </div>
-
-  <div
-    class="sin-datos"
-    *ngIf="ventasPorFecha.length === 0 && !cargando"
-  >
-    No hay ventas registradas para la fecha seleccionada.
-  </div>
-
-</section>
-
-
-  <!-- PRODUCTOS MÁS VENDIDOS -->
-  <!-- PRODUCTOS MÁS VENDIDOS -->
-<section class="reporte-card">
-
-  <div class="card-header">
-    <div>
-      <h2>Productos más vendidos</h2>
-      <p>
-        Productos con mayor cantidad de unidades vendidas durante el día.
-      </p>
-    </div>
-  </div>
-
-  <div
-    class="tabla-contenedor"
-    *ngIf="productosMasVendidos.length > 0"
-  >
-
-    <table>
-
-      <thead>
-        <tr>
-          <th>Posición</th>
-          <th>Producto</th>
-          <th>Unidades vendidas</th>
-          <th>Total generado</th>
-        </tr>
-      </thead>
-
-      <tbody>
-
-        <tr
-          *ngFor="
-            let producto of productosMasVendidos;
-            let i = index
-          "
-        >
-
-          <td class="posicion">
-            {{ i + 1 }}
-          </td>
-
-          <td class="nombre">
-            {{ producto.producto }}
-          </td>
-
-          <td>
-            {{ producto.cantidadVendida }}
-          </td>
-
-          <td class="dinero">
-            Q {{ producto.totalGenerado | number:'1.2-2' }}
-          </td>
-
-        </tr>
-
-      </tbody>
-
-    </table>
-
-  </div>
-
-  <div
-    class="sin-datos"
-    *ngIf="productosMasVendidos.length === 0"
-  >
-    No hay productos vendidos hoy.
-  </div>
 
 </section>

@@ -1,21 +1,30 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit
+} from '@angular/core';
+
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { RouterLink } from '@angular/router';
+
 import { environment } from '../../../enviroments/enviromet';
 
 @Component({
   selector: 'app-productos',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [
+    CommonModule,
+    FormsModule
+  ],
   templateUrl: './productos.component.html',
   styleUrl: './productos.component.scss'
 })
 export class ProductosComponent implements OnInit {
 
   mostrarFormulario = false;
+
   productoEditando: any = null;
+
   usuario: any = null;
 
   nuevoProducto = {
@@ -27,34 +36,65 @@ export class ProductosComponent implements OnInit {
   productos: any[] = [];
 
   mensaje = '';
+
   cargando = false;
 
-  private apiUrl = `${environment.apiUrl}/productos`;
+  private apiUrl =
+    `${environment.apiUrl}/productos`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient
+  ) {}
 
   ngOnInit(): void {
 
-    const usuarioGuardado = localStorage.getItem('usuario');
+    const usuarioGuardado =
+      localStorage.getItem('usuario');
 
     if (usuarioGuardado) {
-      this.usuario = JSON.parse(usuarioGuardado);
+      this.usuario =
+        JSON.parse(usuarioGuardado);
     }
 
     this.cargarProductos();
   }
 
 
+  get totalProductos(): number {
+    return this.productos.length;
+  }
+
+
+  get productosActivos(): number {
+    return this.productos.filter(
+      producto => producto.activo
+    ).length;
+  }
+
+
+  get productosInactivos(): number {
+    return this.productos.filter(
+      producto => !producto.activo
+    ).length;
+  }
+
+
   cargarProductos(): void {
 
-    this.http.get<any[]>(this.apiUrl).subscribe({
+    this.http.get<any[]>(
+      this.apiUrl
+    ).subscribe({
 
       next: (productos) => {
-        this.productos = productos;
+
+        this.productos =
+          productos;
       },
 
       error: () => {
-        this.mensaje = 'No se pudieron cargar los productos.';
+
+        this.mensaje =
+          'No se pudieron cargar los productos.';
       }
 
     });
@@ -64,16 +104,23 @@ export class ProductosComponent implements OnInit {
   crearProducto(): void {
 
     if (!this.nuevoProducto.nombre.trim()) {
-      this.mensaje = 'El nombre es obligatorio.';
+
+      this.mensaje =
+        'El nombre es obligatorio.';
+
       return;
     }
 
     if (this.nuevoProducto.precio <= 0) {
-      this.mensaje = 'El precio debe ser mayor que cero.';
+
+      this.mensaje =
+        'El precio debe ser mayor que cero.';
+
       return;
     }
 
     this.cargando = true;
+
     this.mensaje = '';
 
     this.http.post<any>(
@@ -83,8 +130,11 @@ export class ProductosComponent implements OnInit {
 
       next: () => {
 
-        this.mensaje = 'Producto creado correctamente.';
+        this.mensaje =
+          'Producto creado correctamente.';
+
         this.cargando = false;
+
         this.mostrarFormulario = false;
 
         this.nuevoProducto = {
@@ -101,24 +151,35 @@ export class ProductosComponent implements OnInit {
         this.cargando = false;
 
         if (error.status === 403) {
-          this.mensaje = 'No tiene permisos para crear productos.';
+
+          this.mensaje =
+            'No tiene permisos para crear productos.';
+
           return;
         }
 
-        this.mensaje = 'No se pudo crear el producto.';
+        this.mensaje =
+          'No se pudo crear el producto.';
       }
 
     });
   }
 
 
-  editarProducto(producto: any): void {
+  editarProducto(
+    producto: any
+  ): void {
 
     this.productoEditando = {
       ...producto
     };
 
     this.mensaje = '';
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   }
 
 
@@ -134,33 +195,54 @@ export class ProductosComponent implements OnInit {
       return;
     }
 
-    if (!this.productoEditando.nombre.trim()) {
-      this.mensaje = 'El nombre es obligatorio.';
+    if (
+      !this.productoEditando.nombre.trim()
+    ) {
+
+      this.mensaje =
+        'El nombre es obligatorio.';
+
       return;
     }
 
-    if (this.productoEditando.precio <= 0) {
-      this.mensaje = 'El precio debe ser mayor que cero.';
+    if (
+      this.productoEditando.precio <= 0
+    ) {
+
+      this.mensaje =
+        'El precio debe ser mayor que cero.';
+
       return;
     }
 
     this.cargando = true;
+
     this.mensaje = '';
 
     this.http.put(
       `${this.apiUrl}/${this.productoEditando.id}`,
       {
-        nombre: this.productoEditando.nombre,
-        descripcion: this.productoEditando.descripcion,
-        precio: this.productoEditando.precio,
-        activo: this.productoEditando.activo
+        nombre:
+          this.productoEditando.nombre,
+
+        descripcion:
+          this.productoEditando.descripcion,
+
+        precio:
+          this.productoEditando.precio,
+
+        activo:
+          this.productoEditando.activo
       }
     ).subscribe({
 
       next: () => {
 
-        this.mensaje = 'Producto actualizado correctamente.';
+        this.mensaje =
+          'Producto actualizado correctamente.';
+
         this.cargando = false;
+
         this.productoEditando = null;
 
         this.cargarProductos();
@@ -169,14 +251,18 @@ export class ProductosComponent implements OnInit {
       error: () => {
 
         this.cargando = false;
-        this.mensaje = 'No se pudo actualizar el producto.';
+
+        this.mensaje =
+          'No se pudo actualizar el producto.';
       }
 
     });
   }
 
 
-  desactivarProducto(producto: any): void {
+  desactivarProducto(
+    producto: any
+  ): void {
 
     const confirmar = confirm(
       `¿Deseas desactivar "${producto.nombre}"?`
@@ -193,20 +279,25 @@ export class ProductosComponent implements OnInit {
 
       next: () => {
 
-        this.mensaje = 'Producto desactivado correctamente.';
+        this.mensaje =
+          'Producto desactivado correctamente.';
+
         this.cargarProductos();
       },
 
       error: () => {
 
-        this.mensaje = 'No se pudo desactivar el producto.';
+        this.mensaje =
+          'No se pudo desactivar el producto.';
       }
 
     });
   }
 
 
-  activarProducto(producto: any): void {
+  activarProducto(
+    producto: any
+  ): void {
 
     this.http.patch(
       `${this.apiUrl}/${producto.id}/activar`,
@@ -215,20 +306,25 @@ export class ProductosComponent implements OnInit {
 
       next: () => {
 
-        this.mensaje = 'Producto activado correctamente.';
+        this.mensaje =
+          'Producto activado correctamente.';
+
         this.cargarProductos();
       },
 
       error: () => {
 
-        this.mensaje = 'No se pudo activar el producto.';
+        this.mensaje =
+          'No se pudo activar el producto.';
       }
 
     });
   }
 
 
-  eliminarProducto(producto: any): void {
+  eliminarProducto(
+    producto: any
+  ): void {
 
     const confirmar = confirm(
       `¿Eliminar definitivamente "${producto.nombre}"?`
@@ -244,7 +340,9 @@ export class ProductosComponent implements OnInit {
 
       next: () => {
 
-        this.mensaje = 'Producto eliminado correctamente.';
+        this.mensaje =
+          'Producto eliminado correctamente.';
+
         this.cargarProductos();
       },
 

@@ -1,172 +1,574 @@
-<div class="menu-page">
+<section class="menu-page">
 
-  <!-- ENCABEZADO -->
   <header class="page-header">
 
     <div>
-      <h1>Menú diario</h1>
-      <p>Administra los platos disponibles para el almuerzo.</p>
+
+      <span class="breadcrumb">
+        MENÚ DEL DÍA
+      </span>
+
+      <h1>
+        Menú diario
+      </h1>
+
+      <p>
+        Administra los platos disponibles
+        para el almuerzo de hoy.
+      </p>
+
     </div>
 
-    <a
-      routerLink="/dashboard"
-      class="volver"
+    <div
+      class="fecha-actual"
+      *ngIf="menuActual"
     >
-      Volver al inicio
-    </a>
+
+      <span>
+        Fecha del menú
+      </span>
+
+      <strong>
+        {{
+          menuActual.fecha
+            | date:'dd/MM/yyyy'
+        }}
+      </strong>
+
+    </div>
 
   </header>
 
 
-  <!-- TARJETA PRINCIPAL -->
-  <div class="menu-card">
+  <div
+    class="mensaje"
+    *ngIf="mensaje"
+  >
 
-    <div *ngIf="menuActual; else crearMenuTemplate">
+    <div class="mensaje-icon">
+      i
+    </div>
 
-      <div class="menu-header">
+    <span>
+      {{ mensaje }}
+    </span>
+
+  </div>
+
+
+  <ng-container
+    *ngIf="menuActual; else crearMenuTemplate"
+  >
+
+    <section class="stats-grid">
+
+      <article class="stat-card">
+
+        <div class="stat-icon total">
+
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M4 3h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 4v2h12V7H6Zm0 4v2h12v-2H6Zm0 4v2h8v-2H6Z"
+            />
+          </svg>
+
+        </div>
 
         <div>
-          <h2>Menú de hoy</h2>
 
-          <p>
-            {{ menuActual.fecha | date:'dd/MM/yyyy' }}
-          </p>
-        </div>
-
-        <span class="cantidad-productos">
-          {{ menuActual.productos.length }} producto(s)
-        </span>
-
-      </div>
-
-
-      <!-- PRODUCTOS DEL MENÚ -->
-      <div
-        class="producto"
-        *ngFor="let producto of menuActual.productos"
-        [class.producto-agotado]="!producto.disponible"
-      >
-
-        <div class="producto-info">
-
-          <strong>
-            {{ producto.nombre }}
-          </strong>
-
-          <span *ngIf="producto.descripcion">
-            {{ producto.descripcion }}
+          <span>
+            Productos del menú
           </span>
 
-          <small>
-            Q {{ producto.precio | number:'1.2-2' }}
-          </small>
+          <strong>
+            {{
+              menuActual.productos.length
+            }}
+          </strong>
+
+        </div>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <div class="stat-icon available">
+
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"
+            />
+          </svg>
+
+        </div>
+
+        <div>
+
+          <span>
+            Disponibles
+          </span>
+
+          <strong>
+            {{ productosDisponibles }}
+          </strong>
+
+        </div>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <div class="stat-icon soldout">
+
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M6.7 5.3 5.3 6.7 10.6 12l-5.3 5.3 1.4 1.4 5.3-5.3 5.3 5.3 1.4-1.4-5.3-5.3 5.3-5.3-1.4-1.4-5.3 5.3-5.3-5.3Z"
+            />
+          </svg>
+
+        </div>
+
+        <div>
+
+          <span>
+            Agotados
+          </span>
+
+          <strong>
+            {{ productosAgotados }}
+          </strong>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <section class="menu-layout">
+
+      <section class="menu-panel">
+
+        <div class="panel-header">
+
+          <div>
+
+            <h2>
+              Menú de hoy
+            </h2>
+
+            <p>
+              Controla la disponibilidad
+              de cada producto.
+            </p>
+
+          </div>
+
+          <span class="contador">
+
+            {{
+              menuActual.productos.length
+            }}
+
+            {{
+              menuActual.productos.length === 1
+                ? 'producto'
+                : 'productos'
+            }}
+
+          </span>
 
         </div>
 
 
-          <button
-            type="button"
-            class="btn-disponibilidad"
-            [class.disponible]="producto.disponible"
-            [class.agotado]="!producto.disponible"
-            (click)="cambiarDisponibilidad(producto)"
+        <div class="productos-grid">
+
+          <article
+            class="producto-card"
+            *ngFor="
+              let producto
+              of menuActual.productos
+            "
+            [class.agotado]="
+              !producto.disponible
+            "
           >
-            {{ producto.disponible ? 'Disponible' : 'Agotado' }}
-      </button>
 
-  <button
-    type="button"
-    class="btn-quitar"
-    (click)="quitarProductoDelMenu(producto)"
-  >
-    Quitar
-  </button>
+            <div class="producto-top">
 
-      </div>
+              <div
+                class="producto-avatar"
+                [class.agotado]="
+                  !producto.disponible
+                "
+              >
+
+                {{
+                  producto.nombre
+                    ? producto.nombre.charAt(0)
+                    : 'P'
+                }}
+
+              </div>
 
 
-      <!-- AGREGAR PRODUCTO AL MENÚ -->
-      <div class="agregar-producto-menu">
+              <span
+                class="estado"
+                [class.disponible]="
+                  producto.disponible
+                "
+                [class.agotado]="
+                  !producto.disponible
+                "
+              >
 
-        <h3>Agregar producto al menú</h3>
+                <span class="estado-dot"></span>
 
-        <p class="descripcion-seccion">
-          Puedes agregar otro producto sin necesidad de crear un menú nuevo.
-        </p>
+                {{
+                  producto.disponible
+                    ? 'Disponible'
+                    : 'Agotado'
+                }}
+
+              </span>
+
+            </div>
+
+
+            <div class="producto-info">
+
+              <h3>
+                {{ producto.nombre }}
+              </h3>
+
+              <p
+                *ngIf="
+                  producto.descripcion
+                "
+              >
+                {{
+                  producto.descripcion
+                }}
+              </p>
+
+              <strong>
+                Q {{
+                  producto.precio
+                    | number:'1.2-2'
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="producto-actions">
+
+              <button
+                type="button"
+                class="btn-disponibilidad"
+                [class.reactivar]="
+                  !producto.disponible
+                "
+                (click)="
+                  cambiarDisponibilidad(
+                    producto
+                  )
+                "
+              >
+
+                <svg
+                  *ngIf="
+                    producto.disponible
+                  "
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M6 5h4v14H6V5Zm8 0h4v14h-4V5Z"
+                  />
+                </svg>
+
+                <svg
+                  *ngIf="
+                    !producto.disponible
+                  "
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M8 5v14l11-7L8 5Z"
+                  />
+                </svg>
+
+                {{
+                  producto.disponible
+                    ? 'Marcar agotado'
+                    : 'Marcar disponible'
+                }}
+
+              </button>
+
+
+              <button
+                type="button"
+                class="btn-quitar"
+                title="Quitar producto del menú"
+                (click)="
+                  quitarProductoDelMenu(
+                    producto
+                  )
+                "
+              >
+
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M6 7h12l-1 14H7L6 7Zm3-4h6l1 2h4v2H4V5h4l1-2Z"
+                  />
+                </svg>
+
+              </button>
+
+            </div>
+
+          </article>
+
+        </div>
 
 
         <div
-          class="agregar-producto-form"
-          *ngIf="productosFueraDelMenu.length > 0"
+          class="empty-menu"
+          *ngIf="
+            menuActual.productos.length === 0
+          "
         >
 
-          <select
-            [(ngModel)]="productoAgregarId"
-          >
+          <div class="empty-icon">
 
-            <option value="">
-              Selecciona un producto
-            </option>
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M4 3h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"
+              />
+            </svg>
 
-            <option
-              *ngFor="let producto of productosFueraDelMenu"
-              [value]="producto.id"
-            >
-              {{ producto.nombre }}
-              -
-              Q {{ producto.precio | number:'1.2-2' }}
-            </option>
+          </div>
 
-          </select>
+          <h3>
+            Menú vacío
+          </h3>
+
+          <p>
+            Agrega productos al menú
+            para comenzar.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <aside class="agregar-panel">
+
+        <div class="agregar-header">
+
+          <div class="agregar-icon">
+
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"
+              />
+            </svg>
+
+          </div>
+
+          <div>
+
+            <h2>
+              Agregar producto
+            </h2>
+
+            <p>
+              Añade otro plato
+              al menú de hoy.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <ng-container
+          *ngIf="
+            productosFueraDelMenu.length > 0
+          "
+        >
+
+          <div class="form-group">
+
+            <label for="productoAgregar">
+              Producto
+            </label>
+
+            <div class="select-wrapper">
+
+              <select
+                id="productoAgregar"
+                [(ngModel)]="
+                  productoAgregarId
+                "
+              >
+
+                <option value="">
+                  Selecciona un producto
+                </option>
+
+                <option
+                  *ngFor="
+                    let producto
+                    of productosFueraDelMenu
+                  "
+                  [value]="producto.id"
+                >
+
+                  {{ producto.nombre }}
+                  -
+                  Q {{
+                    producto.precio
+                      | number:'1.2-2'
+                  }}
+
+                </option>
+
+              </select>
+
+              <span>
+                ▾
+              </span>
+
+            </div>
+
+          </div>
 
 
           <button
             type="button"
             class="btn-agregar"
-            (click)="agregarProductoAlMenu()"
-            [disabled]="!productoAgregarId"
+            (click)="
+              agregarProductoAlMenu()
+            "
+            [disabled]="
+              !productoAgregarId
+            "
           >
-            Agregar
+
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"
+              />
+            </svg>
+
+            Agregar al menú
+
           </button>
 
+        </ng-container>
+
+
+        <div
+          class="todos-agregados"
+          *ngIf="
+            productosFueraDelMenu.length === 0
+          "
+        >
+
+          <div class="check-icon">
+
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"
+              />
+            </svg>
+
+          </div>
+
+          <strong>
+            Todos agregados
+          </strong>
+
+          <span>
+            Todos los productos activos
+            forman parte del menú.
+          </span>
+
         </div>
 
 
-        <p
-          class="sin-productos"
-          *ngIf="productosFueraDelMenu.length === 0"
-        >
-          Todos los productos activos ya forman parte del menú de hoy.
-        </p>
+        <div class="help-box">
 
-      </div>
-
-    </div>
-
-
-
-    <!-- SI NO EXISTE MENÚ -->
-    <ng-template #crearMenuTemplate>
-
-      <div class="crear-menu-header">
-
-        <div>
-          <h2>Crear menú del día</h2>
+          <span class="help-dot"></span>
 
           <p>
-            Selecciona los productos que estarán disponibles para el almuerzo.
+            Los cambios realizados
+            se guardan localmente y
+            se sincronizan con la
+            base remota.
           </p>
+
+        </div>
+
+      </aside>
+
+    </section>
+
+  </ng-container>
+
+
+  <ng-template #crearMenuTemplate>
+
+    <section class="crear-menu-card">
+
+      <div class="crear-header">
+
+        <div class="crear-icon">
+
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M4 3h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 4h2v4h4v2h-4v4h-2v-4H7v-2h4V7Z"
+            />
+          </svg>
+
+        </div>
+
+        <div>
+
+          <h2>
+            Crear menú del día
+          </h2>
+
+          <p>
+            Selecciona los productos
+            que estarán disponibles
+            para el almuerzo.
+          </p>
+
         </div>
 
       </div>
 
 
-      <!-- FECHA -->
-      <div class="fecha">
+      <div class="fecha-section">
 
-        <label for="fecha">
-          Fecha del menú
-        </label>
+        <div>
+
+          <label for="fecha">
+            Fecha del menú
+          </label>
+
+          <span>
+            El menú corresponde
+            al día seleccionado.
+          </span>
+
+        </div>
 
         <input
           id="fecha"
@@ -177,81 +579,168 @@
       </div>
 
 
-      <!-- PRODUCTOS -->
-      <h3 class="titulo-productos">
-        Seleccionar productos
-      </h3>
+      <div class="seleccion-header">
+
+        <div>
+
+          <h3>
+            Seleccionar productos
+          </h3>
+
+          <p>
+            Marca los productos que
+            formarán parte del menú.
+          </p>
+
+        </div>
+
+        <span class="seleccionados-badge">
+
+          {{
+            productosSeleccionados.length
+          }}
+          seleccionados
+
+        </span>
+
+      </div>
 
 
       <div
-        class="producto producto-seleccion"
-        *ngFor="let producto of productos"
+        class="seleccion-grid"
+        *ngIf="
+          productos.length > 0
+        "
       >
 
-        <input
-          type="checkbox"
-          [id]="producto.id"
-          (change)="cambiarSeleccion(
-            producto.id,
-            $any($event.target).checked
-          )"
-        >
-
-
         <label
-          [for]="producto.id"
-          class="producto-info"
+          class="producto-seleccion"
+          *ngFor="
+            let producto
+            of productos
+          "
+          [class.selected]="
+            estaSeleccionado(
+              producto.id
+            )
+          "
         >
 
-          <strong>
-            {{ producto.nombre }}
-          </strong>
+          <input
+            type="checkbox"
+            [checked]="
+              estaSeleccionado(
+                producto.id
+              )
+            "
+            (change)="
+              cambiarSeleccion(
+                producto.id,
+                $any(
+                  $event.target
+                ).checked
+              )
+            "
+          >
 
-          <span *ngIf="producto.descripcion">
-            {{ producto.descripcion }}
-          </span>
+          <div class="checkbox-custom">
 
-          <small>
-            Q {{ producto.precio | number:'1.2-2' }}
-          </small>
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"
+              />
+            </svg>
+
+          </div>
+
+
+          <div class="seleccion-avatar">
+
+            {{
+              producto.nombre
+                ? producto.nombre.charAt(0)
+                : 'P'
+            }}
+
+          </div>
+
+
+          <div class="seleccion-info">
+
+            <strong>
+              {{ producto.nombre }}
+            </strong>
+
+            <span
+              *ngIf="
+                producto.descripcion
+              "
+            >
+              {{
+                producto.descripcion
+              }}
+            </span>
+
+            <small>
+              Q {{
+                producto.precio
+                  | number:'1.2-2'
+              }}
+            </small>
+
+          </div>
 
         </label>
 
       </div>
 
 
-      <!-- SIN PRODUCTOS -->
       <div
-        class="sin-productos"
-        *ngIf="productos.length === 0"
+        class="empty-products"
+        *ngIf="
+          productos.length === 0
+        "
       >
-        No hay productos activos disponibles.
+
+        No hay productos activos
+        disponibles.
+
       </div>
 
 
-      <!-- CREAR MENÚ -->
-      <div class="acciones-menu">
+      <div class="crear-actions">
 
         <button
           type="button"
           class="btn-crear-menu"
           (click)="crearMenu()"
-          [disabled]="cargando || productosSeleccionados.length === 0"
+          [disabled]="
+            cargando ||
+            productosSeleccionados.length === 0
+          "
         >
-          {{ cargando ? 'Guardando...' : 'Crear menú del día' }}
+
+          <svg
+            *ngIf="!cargando"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"
+            />
+          </svg>
+
+          {{
+            cargando
+              ? 'Guardando...'
+              : 'Crear menú del día'
+          }}
+
         </button>
 
       </div>
 
-    </ng-template>
+    </section>
 
-    <p
-      class="mensaje"
-      *ngIf="mensaje"
-    >
-      {{ mensaje }}
-    </p>
+  </ng-template>
 
-  </div>
-
-</div>
+</section>

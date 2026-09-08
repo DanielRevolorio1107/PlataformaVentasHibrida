@@ -1,53 +1,360 @@
-<div class="login-page">
+<section class="login-page">
 
-  <div class="login-card">
+  <div class="login-container">
 
-    <div class="login-header">
-      <h1>Plataforma de Ventas</h1>
-      <p>Inicia sesión para continuar</p>
-    </div>
+    <section class="brand-panel">
 
-    <form (ngSubmit)="iniciarSesion()">
+      <div class="brand-content">
 
-      <div class="form-group">
-        <label for="usuario">Usuario</label>
+        <div class="brand-logo">
+          PV
+        </div>
 
-        <input
-          id="usuario"
-          type="text"
-          name="nombreUsuario"
-          [(ngModel)]="nombreUsuario"
-          placeholder="Ingresa tu usuario"
-          required
-        >
+        <div class="brand-name">
+
+          <strong>
+            Plataforma de Ventas
+          </strong>
+
+        </div>
+
       </div>
 
-      <div class="form-group">
-        <label for="password">Contraseña</label>
 
-        <input
-          id="password"
-          type="password"
-          name="password"
-          [(ngModel)]="password"
-          placeholder="Ingresa tu contraseña"
-          required
-        >
-      </div>
+      <div class="brand-main">
 
-      <button
-        type="submit"
-            [disabled]="cargando"
-        >
-            {{ cargando ? 'Ingresando...' : 'Iniciar sesión' }}
-        </button>
+        <span class="brand-badge">
+          SISTEMA HÍBRIDO
+        </span>
 
-        <p class="mensaje" *ngIf="mensaje">
-            {{ mensaje }}
+        <h1>
+          Controla tus ventas
+          de forma simple y segura.
+        </h1>
+
+        <p>
+          Gestiona ventas, productos,
+          menús diarios y reportes desde
+          una sola plataforma.
         </p>
 
-    </form>
+
+        <div class="features">
+
+          <div class="feature">
+
+            <div class="feature-icon">
+
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M3 4h18v16l-3-2-3 2-3-2-3 2-3-2-3 2V4Zm4 4v2h10V8H7Zm0 4v2h7v-2H7Z"
+                />
+              </svg>
+
+            </div>
+
+            <div>
+
+              <strong>
+                Gestión de ventas
+              </strong>
+
+              <span>
+                Registra y consulta operaciones
+                de forma rápida.
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="feature">
+
+            <div class="feature-icon">
+
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M4 3h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 4v2h12V7H6Zm0 4v2h12v-2H6Zm0 4v2h8v-2H6Z"
+                />
+              </svg>
+
+            </div>
+
+            <div>
+
+              <strong>
+                Menú diario
+              </strong>
+
+              <span>
+                Administra los productos
+                disponibles cada día.
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="feature">
+
+            <div class="feature-icon">
+
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3Zm-1 14-4-4 1.4-1.4 2.6 2.6 5.6-5.6L18 9l-7 7Z"
+                />
+              </svg>
+
+            </div>
+
+            <div>
+
+              <strong>
+                Operación híbrida
+              </strong>
+
+              <span>
+                Información local con
+                sincronización remota.
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="brand-footer">
+
+        <span class="status-dot"></span>
+
+        <span>
+          Sistema preparado para operar
+          localmente
+        </span>
+
+      </div>
+
+    </section>
+
+
+    <section class="login-panel">
+
+      <div class="login-box">
+
+        <div class="mobile-logo">
+
+          <div>
+            PV
+          </div>
+
+          <span>
+            Plataforma de Ventas
+          </span>
+
+        </div>
+
+
+        <div class="login-header">
+
+          <span class="eyebrow">
+            BIENVENIDO
+          </span>
+
+          <h2>
+            Iniciar sesión
+          </h2>
+
+          <p>
+            Ingresa tus credenciales
+            para acceder a la plataforma.
+          </p>
+
+        </div>
+
+
+        <form
+          (ngSubmit)="iniciarSesion()"
+        >
+
+          <div class="form-group">
+
+            <label for="usuario">
+              Usuario
+            </label>
+
+            <div class="input-wrapper">
+
+              <div class="input-icon">
+
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm-9 9a9 9 0 0 1 18 0H3Z"
+                  />
+                </svg>
+
+              </div>
+
+              <input
+                id="usuario"
+                type="text"
+                name="nombreUsuario"
+                [(ngModel)]="nombreUsuario"
+                placeholder="Ingresa tu usuario"
+                autocomplete="username"
+                autocapitalize="none"
+                required
+              >
+
+            </div>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="password">
+              Contraseña
+            </label>
+
+            <div class="input-wrapper">
+
+              <div class="input-icon">
+
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M17 8h-1V6a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v10h14V10a2 2 0 0 0-2-2Zm-7-2a2 2 0 0 1 4 0v2h-4V6Zm7 12H7v-8h10v8Z"
+                  />
+                </svg>
+
+              </div>
+
+              <input
+                id="password"
+                [type]="
+                  mostrarPassword
+                    ? 'text'
+                    : 'password'
+                "
+                name="password"
+                [(ngModel)]="password"
+                placeholder="Ingresa tu contraseña"
+                autocomplete="current-password"
+                required
+              >
+
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="alternarPassword()"
+                [attr.aria-label]="
+                  mostrarPassword
+                    ? 'Ocultar contraseña'
+                    : 'Mostrar contraseña'
+                "
+              >
+
+                <svg
+                  *ngIf="!mostrarPassword"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M12 5c-5 0-9.3 3.1-11 7 1.7 3.9 6 7 11 7s9.3-3.1 11-7c-1.7-3.9-6-7-11-7Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"
+                  />
+                </svg>
+
+                <svg
+                  *ngIf="mostrarPassword"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="m3.3 2 18.7 18.7-1.3 1.3-3-3A12 12 0 0 1 12 20C7 20 2.7 16.9 1 13a12 12 0 0 1 4-5.2L2 3.3 3.3 2Zm4.1 7.2A4.9 4.9 0 0 0 7 13a5 5 0 0 0 7.8 4.1l-1.5-1.5A3 3 0 0 1 9.4 11l-2-1.8ZM12 6c5 0 9.3 3.1 11 7a12 12 0 0 1-2.7 4L18.8 15a9.8 9.8 0 0 0 1.9-2c-1.6-2.8-4.9-5-8.7-5-.7 0-1.4.1-2 .2L8.4 6.6A13 13 0 0 1 12 6Zm.2 4a3 3 0 0 1 2.8 2.8L12.2 10Z"
+                  />
+                </svg>
+
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="mensaje"
+            *ngIf="mensaje"
+          >
+
+            <div class="mensaje-icon">
+
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M11 7h2v6h-2V7Zm0 8h2v2h-2v-2Zm1-13a10 10 0 1 1 0 20 10 10 0 0 1 0-20Z"
+                />
+              </svg>
+
+            </div>
+
+            <span>
+              {{ mensaje }}
+            </span>
+
+          </div>
+
+
+          <button
+            type="submit"
+            class="login-button"
+            [disabled]="cargando"
+          >
+
+            <span
+              class="spinner"
+              *ngIf="cargando"
+            ></span>
+
+            <svg
+              *ngIf="!cargando"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M10 17v-4H3v-2h7V7l5 5-5 5Zm3-14h8v18h-8v-2h6V5h-6V3Z"
+              />
+            </svg>
+
+            {{
+              cargando
+                ? 'Ingresando...'
+                : 'Iniciar sesión'
+            }}
+
+          </button>
+
+        </form>
+
+
+        <div class="security-note">
+
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3Zm-1 14-4-4 1.4-1.4 2.6 2.6 5.6-5.6L18 9l-7 7Z"
+            />
+          </svg>
+
+          <span>
+            Acceso restringido a usuarios autorizados.
+          </span>
+
+        </div>
+
+      </div>
+
+    </section>
 
   </div>
 
-</div>
+</section>

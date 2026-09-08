@@ -1,0 +1,230 @@
+<div class="app-shell">
+
+  <aside class="sidebar">
+
+    <div class="brand">
+
+      <div class="brand-icon">
+        PV
+      </div>
+
+      <div class="brand-text">
+        <h2>Plataforma de Ventas</h2>
+      </div>
+
+    </div>
+
+    <div class="menu-label">
+      MENÚ PRINCIPAL
+    </div>
+
+    <nav>
+
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+      >
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z"
+            />
+          </svg>
+        </span>
+
+        <span>Dashboard</span>
+      </a>
+
+      <a
+        routerLink="/ventas"
+        routerLinkActive="active"
+      >
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Zm0 4h14V6H5v2Zm2 4h4v2H7v-2Zm0 4h7v2H7v-2Z"
+            />
+          </svg>
+        </span>
+
+        <span>Ventas</span>
+      </a>
+
+      <a
+        routerLink="/productos"
+        routerLinkActive="active"
+      >
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="m12 2 9 5-9 5-9-5 9-5Zm-9 8 9 5 9-5v7l-9 5-9-5v-7Z"
+            />
+          </svg>
+        </span>
+
+        <span>Productos</span>
+      </a>
+
+      <a
+        *ngIf="usuario?.rol === 'Administrador'"
+        routerLink="/menu-diario"
+        routerLinkActive="active"
+      >
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M4 3h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 4v2h12V7H6Zm0 4v2h12v-2H6Zm0 4v2h8v-2H6Z"
+            />
+          </svg>
+        </span>
+
+        <span>Menú diario</span>
+      </a>
+
+      <a
+        routerLink="/reportes"
+        routerLinkActive="active"
+      >
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M4 20V10h4v10H4Zm6 0V4h4v16h-4Zm6 0v-7h4v7h-4Z"
+            />
+          </svg>
+        </span>
+
+        <span>Reportes</span>
+      </a>
+
+      <a
+        *ngIf="usuario?.rol === 'Administrador'"
+        routerLink="/usuarios"
+        routerLinkActive="active"
+      >
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm-9 9a9 9 0 0 1 18 0H3Z"
+            />
+          </svg>
+        </span>
+
+        <span>Usuarios</span>
+      </a>
+
+      <a
+        *ngIf="usuario?.rol === 'Administrador'"
+        routerLink="/historial-ventas"
+        routerLinkActive="active"
+      >
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M13 3a9 9 0 1 1-8.5 6H2l4-4 4 4H7a6 6 0 1 0 6-3v4l5 3-1 1.7-6-3.7V3h2Z"
+            />
+          </svg>
+        </span>
+
+        <span>Historial</span>
+      </a>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+      <div
+        class="connection-box"
+        [class.offline]="!estaEnLinea"
+      >
+
+        <span class="status-dot"></span>
+
+        <div>
+          <strong>
+            {{
+              estaEnLinea
+                ? 'Sistema conectado'
+                : 'Modo sin conexión'
+            }}
+          </strong>
+
+          <span>
+            {{
+              estaEnLinea
+                ? 'Conexión disponible'
+                : 'Trabajando localmente'
+            }}
+          </span>
+        </div>
+
+      </div>
+
+      <button
+        class="logout"
+        (click)="cerrarSesion()"
+      >
+
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M10 3H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6v-2H4V5h6V3Zm8 4 5 5-5 5v-3h-6v-4h6V7Z"
+          />
+        </svg>
+
+        Cerrar sesión
+
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <section class="main-area">
+
+    <header class="topbar">
+
+      <div class="topbar-brand">
+        Plataforma de Ventas
+      </div>
+
+      <div class="user-area">
+
+        <span class="date">
+          {{
+            fechaActual
+              | date:'dd MMMM, yyyy'
+          }}
+        </span>
+
+        <div class="avatar">
+          {{
+            usuario?.nombreCompleto
+              ? usuario.nombreCompleto.charAt(0)
+              : 'U'
+          }}
+        </div>
+
+        <div class="user-data">
+          <strong>
+            {{ usuario?.nombreCompleto }}
+          </strong>
+
+          <span>
+            {{ usuario?.rol }}
+          </span>
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <main class="page-content">
+
+      <router-outlet></router-outlet>
+
+    </main>
+
+  </section>
+
+</div>

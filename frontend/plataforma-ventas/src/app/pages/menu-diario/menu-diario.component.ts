@@ -1,8 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit
+} from '@angular/core';
+
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { RouterLink } from '@angular/router';
+
 import { environment } from '../../../enviroments/enviromet';
 
 @Component({
@@ -10,8 +14,7 @@ import { environment } from '../../../enviroments/enviromet';
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
-    RouterLink
+    FormsModule
   ],
   templateUrl: './menu-diario.component.html',
   styleUrl: './menu-diario.component.scss'
@@ -19,7 +22,9 @@ import { environment } from '../../../enviroments/enviromet';
 export class MenuDiarioComponent implements OnInit {
 
   productos: any[] = [];
+
   productosSeleccionados: string[] = [];
+
   productoAgregarId = '';
 
   menuActual: any = null;
@@ -27,30 +32,67 @@ export class MenuDiarioComponent implements OnInit {
   fecha = this.obtenerFechaLocal();
 
   mensaje = '';
+
   cargando = false;
 
-  private productosUrl = `${environment.apiUrl}/productos`;
-  private menusUrl = `${environment.apiUrl}/menus`;
+  private productosUrl =
+    `${environment.apiUrl}/productos`;
 
-  constructor(private http: HttpClient) {}
+  private menusUrl =
+    `${environment.apiUrl}/menus`;
+
+  constructor(
+    private http: HttpClient
+  ) {}
 
   ngOnInit(): void {
     this.cargarMenuHoy();
     this.cargarProductos();
   }
 
+  get productosDisponibles(): number {
+
+    if (!this.menuActual) {
+      return 0;
+    }
+
+    return this.menuActual.productos.filter(
+      (producto: any) =>
+        producto.disponible
+    ).length;
+  }
+
+  get productosAgotados(): number {
+
+    if (!this.menuActual) {
+      return 0;
+    }
+
+    return this.menuActual.productos.filter(
+      (producto: any) =>
+        !producto.disponible
+    ).length;
+  }
 
   obtenerFechaLocal(): string {
 
     const hoy = new Date();
 
-    const anio = hoy.getFullYear();
-    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-    const dia = String(hoy.getDate()).padStart(2, '0');
+    const anio =
+      hoy.getFullYear();
+
+    const mes =
+      String(
+        hoy.getMonth() + 1
+      ).padStart(2, '0');
+
+    const dia =
+      String(
+        hoy.getDate()
+      ).padStart(2, '0');
 
     return `${anio}-${mes}-${dia}`;
   }
-
 
   get productosFueraDelMenu(): any[] {
 
@@ -58,11 +100,13 @@ export class MenuDiarioComponent implements OnInit {
       return this.productos;
     }
 
-    const productosMenu = new Set(
-      this.menuActual.productos.map(
-        (producto: any) => producto.productoId
-      )
-    );
+    const productosMenu =
+      new Set(
+        this.menuActual.productos.map(
+          (producto: any) =>
+            producto.productoId
+        )
+      );
 
     return this.productos.filter(
       producto =>
@@ -71,6 +115,13 @@ export class MenuDiarioComponent implements OnInit {
     );
   }
 
+  estaSeleccionado(
+    productoId: string
+  ): boolean {
+
+    return this.productosSeleccionados
+      .includes(productoId);
+  }
 
   cargarMenuHoy(): void {
 
@@ -79,13 +130,17 @@ export class MenuDiarioComponent implements OnInit {
     ).subscribe({
 
       next: (menu) => {
-        this.menuActual = menu;
+
+        this.menuActual =
+          menu;
       },
 
       error: (error) => {
 
         if (error.status === 404) {
+
           this.menuActual = null;
+
           return;
         }
 
@@ -96,7 +151,6 @@ export class MenuDiarioComponent implements OnInit {
     });
   }
 
-
   cargarProductos(): void {
 
     this.http.get<any[]>(
@@ -105,9 +159,11 @@ export class MenuDiarioComponent implements OnInit {
 
       next: (productos) => {
 
-        this.productos = productos.filter(
-          producto => producto.activo
-        );
+        this.productos =
+          productos.filter(
+            producto =>
+              producto.activo
+          );
       },
 
       error: () => {
@@ -119,7 +175,6 @@ export class MenuDiarioComponent implements OnInit {
     });
   }
 
-
   cambiarSeleccion(
     productoId: string,
     seleccionado: boolean
@@ -127,23 +182,31 @@ export class MenuDiarioComponent implements OnInit {
 
     if (seleccionado) {
 
-      if (!this.productosSeleccionados.includes(productoId)) {
-        this.productosSeleccionados.push(productoId);
+      if (
+        !this.productosSeleccionados
+          .includes(productoId)
+      ) {
+
+        this.productosSeleccionados
+          .push(productoId);
       }
 
     } else {
 
       this.productosSeleccionados =
         this.productosSeleccionados.filter(
-          id => id !== productoId
+          id =>
+            id !== productoId
         );
     }
   }
 
-
   crearMenu(): void {
 
-    if (this.productosSeleccionados.length === 0) {
+    if (
+      this.productosSeleccionados
+        .length === 0
+    ) {
 
       this.mensaje =
         'Selecciona al menos un producto.';
@@ -152,17 +215,20 @@ export class MenuDiarioComponent implements OnInit {
     }
 
     this.cargando = true;
+
     this.mensaje = '';
 
     const datos = {
 
-      fecha: this.fecha,
+      fecha:
+        this.fecha,
 
-      productos: this.productosSeleccionados.map(
-        id => ({
-          productoId: id
-        })
-      )
+      productos:
+        this.productosSeleccionados.map(
+          id => ({
+            productoId: id
+          })
+        )
     };
 
     this.http.post(
@@ -172,21 +238,26 @@ export class MenuDiarioComponent implements OnInit {
 
       next: () => {
 
-        this.cargando = false;
+        this.cargando =
+          false;
 
         this.mensaje =
           'Menú diario creado correctamente.';
 
-        this.productosSeleccionados = [];
+        this.productosSeleccionados =
+          [];
 
         this.cargarMenuHoy();
       },
 
       error: (error) => {
 
-        this.cargando = false;
+        this.cargando =
+          false;
 
-        if (error.status === 409) {
+        if (
+          error.status === 409
+        ) {
 
           this.mensaje =
             'Ya existe un menú para esta fecha.';
@@ -202,11 +273,15 @@ export class MenuDiarioComponent implements OnInit {
     });
   }
 
-
-  cambiarDisponibilidad(producto: any): void {
+  cambiarDisponibilidad(
+    producto: any
+  ): void {
 
     if (!this.menuActual) {
-      this.mensaje = 'No existe un menú activo.';
+
+      this.mensaje =
+        'No existe un menú activo.';
+
       return;
     }
 
@@ -244,7 +319,6 @@ export class MenuDiarioComponent implements OnInit {
     });
   }
 
-
   agregarProductoAlMenu(): void {
 
     if (!this.menuActual) {
@@ -273,7 +347,8 @@ export class MenuDiarioComponent implements OnInit {
         this.mensaje =
           'Producto agregado al menú correctamente.';
 
-        this.productoAgregarId = '';
+        this.productoAgregarId =
+          '';
 
         this.cargarMenuHoy();
       },
@@ -288,8 +363,9 @@ export class MenuDiarioComponent implements OnInit {
     });
   }
 
-
-  quitarProductoDelMenu(producto: any): void {
+  quitarProductoDelMenu(
+    producto: any
+  ): void {
 
     if (!this.menuActual) {
 
@@ -299,9 +375,10 @@ export class MenuDiarioComponent implements OnInit {
       return;
     }
 
-    const confirmar = confirm(
-      `¿Deseas quitar "${producto.nombre}" del menú de hoy?`
-    );
+    const confirmar =
+      confirm(
+        `¿Deseas quitar "${producto.nombre}" del menú de hoy?`
+      );
 
     if (!confirmar) {
       return;
@@ -321,7 +398,9 @@ export class MenuDiarioComponent implements OnInit {
 
       error: (error) => {
 
-        if (error.status === 409) {
+        if (
+          error.status === 409
+        ) {
 
           this.mensaje =
             error.error?.mensaje ||

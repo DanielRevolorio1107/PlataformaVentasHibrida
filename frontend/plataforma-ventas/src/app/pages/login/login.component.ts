@@ -3,61 +3,92 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+
 import { environment } from '../../../enviroments/enviromet';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [
+    FormsModule,
+    CommonModule
+  ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
 export class LoginComponent {
 
   nombreUsuario = '';
+
   password = '';
 
   mensaje = '';
+
   cargando = false;
 
-  private apiUrl = `${environment.apiUrl}/usuarios/login`;
+  mostrarPassword = false;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  private apiUrl =
+    `${environment.apiUrl}/usuarios/login`;
 
-  iniciarSesion() {
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {}
+
+  iniciarSesion(): void {
 
     this.mensaje = '';
+
     this.cargando = true;
 
     const datos = {
-      nombreUsuario: this.nombreUsuario,
-      password: this.password
+      nombreUsuario:
+        this.nombreUsuario,
+      password:
+        this.password
     };
 
-    this.http.post<any>(this.apiUrl, datos).subscribe({
+    this.http.post<any>(
+      this.apiUrl,
+      datos
+    ).subscribe({
 
       next: (respuesta) => {
 
-        localStorage.setItem('token', respuesta.token);
+        localStorage.setItem(
+          'token',
+          respuesta.token
+        );
 
         localStorage.setItem(
           'usuario',
-          JSON.stringify(respuesta.usuario)
+          JSON.stringify(
+            respuesta.usuario
+          )
         );
 
-        this.mensaje = 'Inicio de sesión correcto';
         this.cargando = false;
-        this.router.navigate(['/dashboard']);
 
-        console.log(respuesta);
+        this.router.navigate([
+          '/dashboard'
+        ]);
       },
 
       error: () => {
 
-        this.mensaje = 'Usuario o contraseña incorrectos';
+        this.mensaje =
+          'Usuario o contraseña incorrectos.';
+
         this.cargando = false;
-        
       }
+
     });
+  }
+
+  alternarPassword(): void {
+
+    this.mostrarPassword =
+      !this.mostrarPassword;
   }
 }

@@ -1,58 +1,210 @@
-<div class="productos-page">
+<section class="productos-page">
 
   <!-- ENCABEZADO -->
   <header class="page-header">
+
     <div>
-      <h1>Productos</h1>
-      <p>Administración del catálogo de productos.</p>
+
+      <span class="breadcrumb">
+        CATÁLOGO
+      </span>
+
+      <h1>
+        Productos
+      </h1>
+
+      <p>
+        Administra los productos disponibles
+        para las ventas y menús diarios.
+      </p>
+
     </div>
 
-    <a routerLink="/dashboard" class="volver">
-      Volver al inicio
-    </a>
+
+    <button
+      *ngIf="usuario?.rol === 'Administrador'"
+      type="button"
+      class="btn-nuevo"
+      (click)="mostrarFormulario = !mostrarFormulario"
+    >
+
+      <svg viewBox="0 0 24 24">
+        <path
+          d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"
+        />
+      </svg>
+
+      {{
+        mostrarFormulario
+          ? 'Cancelar'
+          : 'Nuevo producto'
+      }}
+
+    </button>
+
   </header>
 
 
-  <!-- ACCIONES SUPERIORES -->
-  <section
-    class="acciones-superiores"
-    *ngIf="usuario?.rol === 'Administrador'"
+  <!-- MENSAJE -->
+  <div
+    class="mensaje"
+    *ngIf="mensaje"
   >
-    <button
-      type="button"
-      class="btn-primary"
-      (click)="mostrarFormulario = !mostrarFormulario"
-    >
-      {{ mostrarFormulario ? 'Cancelar' : 'Nuevo producto' }}
-    </button>
+
+    <div class="mensaje-icon">
+      i
+    </div>
+
+    <span>
+      {{ mensaje }}
+    </span>
+
+  </div>
+
+
+  <!-- MÉTRICAS -->
+  <section class="stats-grid">
+
+    <article class="stat-card">
+
+      <div class="stat-icon total">
+
+        <svg viewBox="0 0 24 24">
+          <path
+            d="m12 2 9 5-9 5-9-5 9-5Zm-9 8 9 5 9-5v7l-9 5-9-5v-7Z"
+          />
+        </svg>
+
+      </div>
+
+      <div>
+
+        <span>
+          Total de productos
+        </span>
+
+        <strong>
+          {{ totalProductos }}
+        </strong>
+
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon active">
+
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"
+          />
+        </svg>
+
+      </div>
+
+      <div>
+
+        <span>
+          Productos activos
+        </span>
+
+        <strong>
+          {{ productosActivos }}
+        </strong>
+
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon inactive">
+
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M6.7 5.3 5.3 6.7 10.6 12l-5.3 5.3 1.4 1.4 5.3-5.3 5.3 5.3 1.4-1.4-5.3-5.3 5.3-5.3-1.4-1.4-5.3 5.3-5.3-5.3Z"
+          />
+        </svg>
+
+      </div>
+
+      <div>
+
+        <span>
+          Productos inactivos
+        </span>
+
+        <strong>
+          {{ productosInactivos }}
+        </strong>
+
+      </div>
+
+    </article>
+
   </section>
 
 
-  <!-- FORMULARIO NUEVO PRODUCTO -->
-  <div
+  <!-- NUEVO PRODUCTO -->
+  <section
     class="formulario-card"
-    *ngIf="mostrarFormulario && usuario?.rol === 'Administrador'"
+    *ngIf="
+      mostrarFormulario &&
+      usuario?.rol === 'Administrador'
+    "
   >
 
-    <h2>Nuevo producto</h2>
+    <div class="formulario-header">
+
+      <div class="formulario-icon">
+
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"
+          />
+        </svg>
+
+      </div>
+
+      <div>
+
+        <h2>
+          Nuevo producto
+        </h2>
+
+        <p>
+          Ingresa la información del producto
+          que deseas agregar.
+        </p>
+
+      </div>
+
+    </div>
+
 
     <div class="form-grid">
 
       <div class="form-group">
+
         <label for="nuevoNombre">
-          Nombre
+          Nombre del producto
         </label>
 
         <input
           id="nuevoNombre"
           type="text"
           [(ngModel)]="nuevoProducto.nombre"
-          placeholder="Nombre del producto"
+          placeholder="Ej. Pollo horneado"
         >
+
       </div>
 
 
       <div class="form-group">
+
         <label for="nuevaDescripcion">
           Descripción
         </label>
@@ -61,23 +213,34 @@
           id="nuevaDescripcion"
           type="text"
           [(ngModel)]="nuevoProducto.descripcion"
-          placeholder="Descripción del producto"
+          placeholder="Descripción breve del producto"
         >
+
       </div>
 
 
       <div class="form-group">
+
         <label for="nuevoPrecio">
           Precio
         </label>
 
-        <input
-          id="nuevoPrecio"
-          type="number"
-          min="0.01"
-          step="0.01"
-          [(ngModel)]="nuevoProducto.precio"
-        >
+        <div class="price-input">
+
+          <span>
+            Q
+          </span>
+
+          <input
+            id="nuevoPrecio"
+            type="number"
+            min="0.01"
+            step="0.01"
+            [(ngModel)]="nuevoProducto.precio"
+          >
+
+        </div>
+
       </div>
 
     </div>
@@ -87,16 +250,32 @@
 
       <button
         type="button"
-        class="btn-primary"
+        class="btn-guardar"
         (click)="crearProducto()"
         [disabled]="cargando"
       >
-        {{ cargando ? 'Guardando...' : 'Guardar producto' }}
+
+        <svg
+          *ngIf="!cargando"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"
+          />
+        </svg>
+
+        {{
+          cargando
+            ? 'Guardando...'
+            : 'Guardar producto'
+        }}
+
       </button>
+
 
       <button
         type="button"
-        class="btn-secondary"
+        class="btn-cancelar"
         (click)="mostrarFormulario = false"
       >
         Cancelar
@@ -104,167 +283,52 @@
 
     </div>
 
-  </div>
+  </section>
 
 
-  <!-- CATÁLOGO DE PRODUCTOS -->
-  <div class="productos-card">
-
-    <div class="tabla-header">
-
-      <h2>Catálogo de productos</h2>
-
-      <span>
-        {{ productos.length }} producto(s)
-      </span>
-
-    </div>
-
-
-    <!-- TABLA -->
-    <div
-      class="tabla-contenedor"
-      *ngIf="productos.length > 0"
-    >
-
-      <table>
-
-        <thead>
-
-          <tr>
-            <th>Producto</th>
-            <th>Descripción</th>
-            <th>Precio</th>
-            <th>Estado</th>
-
-            <th *ngIf="usuario?.rol === 'Administrador'">
-              Acciones
-            </th>
-          </tr>
-
-        </thead>
-
-
-        <tbody>
-
-          <tr *ngFor="let producto of productos">
-
-            <!-- NOMBRE -->
-            <td class="producto-nombre">
-              {{ producto.nombre }}
-            </td>
-
-
-            <!-- DESCRIPCIÓN -->
-            <td>
-              {{ producto.descripcion || '-' }}
-            </td>
-
-
-            <!-- PRECIO -->
-            <td class="precio">
-              Q {{ producto.precio | number:'1.2-2' }}
-            </td>
-
-
-            <!-- ESTADO -->
-            <td>
-
-              <span
-                class="estado"
-                [class.activo]="producto.activo"
-                [class.inactivo]="!producto.activo"
-              >
-                {{ producto.activo ? 'Activo' : 'Inactivo' }}
-              </span>
-
-            </td>
-
-
-            <!-- ACCIONES -->
-            <td
-              class="acciones"
-              *ngIf="usuario?.rol === 'Administrador'"
-            >
-
-              <!-- EDITAR -->
-              <button
-                type="button"
-                class="btn-editar"
-                (click)="editarProducto(producto)"
-              >
-                Editar
-              </button>
-
-
-              <!-- DESACTIVAR -->
-              <button
-                *ngIf="producto.activo"
-                type="button"
-                class="btn-desactivar"
-                (click)="desactivarProducto(producto)"
-              >
-                Desactivar
-              </button>
-
-
-              <!-- ACTIVAR -->
-              <button
-                *ngIf="!producto.activo"
-                type="button"
-                class="btn-activar"
-                (click)="activarProducto(producto)"
-              >
-                Activar
-              </button>
-
-
-              <!-- ELIMINAR -->
-              <button
-                type="button"
-                class="btn-eliminar"
-                (click)="eliminarProducto(producto)"
-              >
-                Eliminar
-              </button>
-
-            </td>
-
-          </tr>
-
-        </tbody>
-
-      </table>
-
-    </div>
-
-
-    <!-- SIN PRODUCTOS -->
-    <div
-      class="sin-productos"
-      *ngIf="productos.length === 0"
-    >
-      No hay productos registrados.
-    </div>
-
-  </div>
-
-
-  <!-- FORMULARIO EDITAR PRODUCTO -->
-  <div
-    class="formulario-card"
-    *ngIf="productoEditando && usuario?.rol === 'Administrador'"
+  <!-- EDICIÓN -->
+  <section
+    class="formulario-card editar-card"
+    *ngIf="
+      productoEditando &&
+      usuario?.rol === 'Administrador'
+    "
   >
 
-    <h2>Editar producto</h2>
+    <div class="formulario-header">
+
+      <div class="formulario-icon edit">
+
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M3 17.3V21h3.7L17.8 9.9l-3.7-3.7L3 17.3ZM20.7 7c.4-.4.4-1 0-1.4l-2.3-2.3a1 1 0 0 0-1.4 0l-1.8 1.8 3.7 3.7L20.7 7Z"
+          />
+        </svg>
+
+      </div>
+
+      <div>
+
+        <h2>
+          Editar producto
+        </h2>
+
+        <p>
+          Modifica la información de
+          {{ productoEditando.nombre }}.
+        </p>
+
+      </div>
+
+    </div>
+
 
     <div class="form-grid">
-
 
       <div class="form-group">
 
         <label for="editarNombre">
-          Nombre
+          Nombre del producto
         </label>
 
         <input
@@ -297,13 +361,21 @@
           Precio
         </label>
 
-        <input
-          id="editarPrecio"
-          type="number"
-          min="0.01"
-          step="0.01"
-          [(ngModel)]="productoEditando.precio"
-        >
+        <div class="price-input">
+
+          <span>
+            Q
+          </span>
+
+          <input
+            id="editarPrecio"
+            type="number"
+            min="0.01"
+            step="0.01"
+            [(ngModel)]="productoEditando.precio"
+          >
+
+        </div>
 
       </div>
 
@@ -314,17 +386,23 @@
 
       <button
         type="button"
-        class="btn-primary"
+        class="btn-guardar"
         (click)="guardarEdicion()"
         [disabled]="cargando"
       >
-        {{ cargando ? 'Guardando...' : 'Guardar cambios' }}
+
+        {{
+          cargando
+            ? 'Guardando...'
+            : 'Guardar cambios'
+        }}
+
       </button>
 
 
       <button
         type="button"
-        class="btn-secondary"
+        class="btn-cancelar"
         (click)="cancelarEdicion()"
       >
         Cancelar
@@ -332,15 +410,272 @@
 
     </div>
 
-  </div>
+  </section>
 
 
-  <!-- MENSAJE -->
-  <div
-    class="mensaje"
-    *ngIf="mensaje"
-  >
-    {{ mensaje }}
-  </div>
+  <!-- TABLA -->
+  <section class="productos-card">
 
-</div>
+    <div class="tabla-header">
+
+      <div>
+
+        <h2>
+          Catálogo de productos
+        </h2>
+
+        <p>
+          Productos registrados en el sistema
+        </p>
+
+      </div>
+
+
+      <span class="contador">
+
+        {{ productos.length }}
+
+        {{
+          productos.length === 1
+            ? 'producto'
+            : 'productos'
+        }}
+
+      </span>
+
+    </div>
+
+
+    <div
+      class="tabla-contenedor"
+      *ngIf="productos.length > 0"
+    >
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Producto
+            </th>
+
+            <th>
+              Descripción
+            </th>
+
+            <th>
+              Precio
+            </th>
+
+            <th>
+              Estado
+            </th>
+
+            <th
+              *ngIf="
+                usuario?.rol === 'Administrador'
+              "
+            >
+              Acciones
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <tr
+            *ngFor="let producto of productos"
+          >
+
+            <!-- PRODUCTO -->
+            <td>
+
+              <div class="producto-cell">
+
+                <div class="producto-avatar">
+                  {{
+                    producto.nombre
+                      ? producto.nombre.charAt(0)
+                      : 'P'
+                  }}
+                </div>
+
+                <strong>
+                  {{ producto.nombre }}
+                </strong>
+
+              </div>
+
+            </td>
+
+
+            <!-- DESCRIPCIÓN -->
+            <td class="descripcion-cell">
+
+              {{
+                producto.descripcion
+                  || 'Sin descripción'
+              }}
+
+            </td>
+
+
+            <!-- PRECIO -->
+            <td class="precio-cell">
+
+              Q {{
+                producto.precio
+                  | number:'1.2-2'
+              }}
+
+            </td>
+
+
+            <!-- ESTADO -->
+            <td>
+
+              <span
+                class="estado"
+                [class.activo]="producto.activo"
+                [class.inactivo]="!producto.activo"
+              >
+
+                <span class="estado-dot"></span>
+
+                {{
+                  producto.activo
+                    ? 'Activo'
+                    : 'Inactivo'
+                }}
+
+              </span>
+
+            </td>
+
+
+            <!-- ACCIONES -->
+            <td
+              *ngIf="
+                usuario?.rol === 'Administrador'
+              "
+            >
+
+              <div class="acciones">
+
+                <!-- EDITAR -->
+                <button
+                  type="button"
+                  class="action-btn edit"
+                  title="Editar producto"
+                  (click)="editarProducto(producto)"
+                >
+
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M3 17.3V21h3.7L17.8 9.9l-3.7-3.7L3 17.3ZM20.7 7c.4-.4.4-1 0-1.4l-2.3-2.3a1 1 0 0 0-1.4 0l-1.8 1.8 3.7 3.7L20.7 7Z"
+                    />
+                  </svg>
+
+                </button>
+
+
+                <!-- DESACTIVAR -->
+                <button
+                  *ngIf="producto.activo"
+                  type="button"
+                  class="action-btn pause"
+                  title="Desactivar producto"
+                  (click)="desactivarProducto(producto)"
+                >
+
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M6 5h4v14H6V5Zm8 0h4v14h-4V5Z"
+                    />
+                  </svg>
+
+                </button>
+
+
+                <!-- ACTIVAR -->
+                <button
+                  *ngIf="!producto.activo"
+                  type="button"
+                  class="action-btn activate"
+                  title="Activar producto"
+                  (click)="activarProducto(producto)"
+                >
+
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M8 5v14l11-7L8 5Z"
+                    />
+                  </svg>
+
+                </button>
+
+
+                <!-- ELIMINAR -->
+                <button
+                  type="button"
+                  class="action-btn delete"
+                  title="Eliminar producto"
+                  (click)="eliminarProducto(producto)"
+                >
+
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M6 7h12l-1 14H7L6 7Zm3-4h6l1 2h4v2H4V5h4l1-2Zm1 7v8h2v-8h-2Zm4 0v8h2v-8h-2Z"
+                    />
+                  </svg>
+
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- SIN PRODUCTOS -->
+    <div
+      class="sin-productos"
+      *ngIf="productos.length === 0"
+    >
+
+      <div class="empty-icon">
+
+        <svg viewBox="0 0 24 24">
+          <path
+            d="m12 2 9 5-9 5-9-5 9-5Zm-9 8 9 5 9-5v7l-9 5-9-5v-7Z"
+          />
+        </svg>
+
+      </div>
+
+      <h3>
+        No hay productos
+      </h3>
+
+      <p>
+        Aún no se han registrado productos
+        en el sistema.
+      </p>
+
+    </div>
+
+  </section>
+
+</section>

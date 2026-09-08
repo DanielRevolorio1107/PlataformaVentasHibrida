@@ -1,152 +1,474 @@
-<div class="historial-page">
+<section class="historial-page">
 
-  <!-- ENCABEZADO -->
   <header class="page-header">
 
     <div>
-      <h1>Historial de ventas</h1>
-      <p>Consulta y administración de las ventas registradas.</p>
+
+      <span class="breadcrumb">
+        CONTROL DE VENTAS
+      </span>
+
+      <h1>
+        Historial de ventas
+      </h1>
+
+      <p>
+        Consulta las operaciones registradas
+        y administra el estado de cada venta.
+      </p>
+
     </div>
 
-    <a
-      routerLink="/dashboard"
-      class="volver"
+    <button
+      type="button"
+      class="btn-actualizar"
+      (click)="cargarVentas()"
+      [disabled]="cargando"
     >
-      Volver al inicio
-    </a>
+
+      <svg viewBox="0 0 24 24">
+        <path
+          d="M17.7 6.3A8 8 0 1 0 20 12h-2a6 6 0 1 1-1.8-4.3L13 11h8V3l-3.3 3.3Z"
+        />
+      </svg>
+
+      {{
+        cargando
+          ? 'Actualizando...'
+          : 'Actualizar'
+      }}
+
+    </button>
 
   </header>
 
 
-  <!-- TARJETA PRINCIPAL -->
+  <div
+    class="mensaje"
+    *ngIf="mensaje"
+  >
+
+    <div class="mensaje-icon">
+      i
+    </div>
+
+    <span>
+      {{ mensaje }}
+    </span>
+
+  </div>
+
+
+  <section class="stats-grid">
+
+    <article class="stat-card">
+
+      <div class="stat-icon total">
+
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M3 4h18v16l-3-2-3 2-3-2-3 2-3-2-3 2V4Zm4 4v2h10V8H7Zm0 4v2h7v-2H7Z"
+          />
+        </svg>
+
+      </div>
+
+      <div>
+
+        <span>
+          Total de ventas
+        </span>
+
+        <strong>
+          {{ totalVentas }}
+        </strong>
+
+        <small>
+          Operaciones registradas
+        </small>
+
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon registradas">
+
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"
+          />
+        </svg>
+
+      </div>
+
+      <div>
+
+        <span>
+          Ventas registradas
+        </span>
+
+        <strong>
+          {{ ventasRegistradas }}
+        </strong>
+
+        <small>
+          Ventas vigentes
+        </small>
+
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon anuladas">
+
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M6.7 5.3 5.3 6.7 10.6 12l-5.3 5.3 1.4 1.4 5.3-5.3 5.3 5.3 1.4-1.4-5.3-5.3 5.3-5.3-1.4-1.4-5.3 5.3-5.3-5.3Z"
+          />
+        </svg>
+
+      </div>
+
+      <div>
+
+        <span>
+          Ventas anuladas
+        </span>
+
+        <strong>
+          {{ ventasAnuladas }}
+        </strong>
+
+        <small>
+          Operaciones canceladas
+        </small>
+
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon ingresos">
+
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M12 1v2a7 7 0 1 0 7 7h2A9 9 0 1 1 12 1Zm1 4h8v8h-2V8.4l-6.3 6.3-1.4-1.4L17.6 7H13V5Z"
+          />
+        </svg>
+
+      </div>
+
+      <div>
+
+        <span>
+          Ingresos vigentes
+        </span>
+
+        <strong>
+          Q {{
+            totalIngresos
+              | number:'1.2-2'
+          }}
+        </strong>
+
+        <small>
+          Sin incluir ventas anuladas
+        </small>
+
+      </div>
+
+    </article>
+
+  </section>
+
+
   <section class="historial-card">
 
     <div class="tabla-header">
 
       <div>
-        <h2>Ventas registradas</h2>
+
+        <h2>
+          Ventas registradas
+        </h2>
+
         <p>
-          Se muestran tanto las ventas registradas como las anuladas.
+          Se muestran las ventas vigentes
+          y las operaciones anuladas.
         </p>
+
       </div>
 
-      <span>
-        {{ ventas.length }} venta(s)
+      <span class="contador">
+
+        {{ ventas.length }}
+
+        {{
+          ventas.length === 1
+            ? 'venta'
+            : 'ventas'
+        }}
+
       </span>
 
     </div>
 
 
-    <!-- CARGANDO -->
     <div
       class="estado-carga"
       *ngIf="cargando"
     >
-      Cargando historial...
+
+      <div class="spinner"></div>
+
+      <strong>
+        Cargando historial
+      </strong>
+
+      <span>
+        Consultando las ventas registradas...
+      </span>
+
     </div>
 
 
-    <!-- TABLA -->
     <div
       class="tabla-contenedor"
-      *ngIf="ventas.length > 0 && !cargando"
+      *ngIf="
+        ventas.length > 0 &&
+        !cargando
+      "
     >
 
       <table>
 
         <thead>
+
           <tr>
-            <th>Fecha</th>
-            <th>Usuario</th>
-            <th>Método de pago</th>
-            <th>Productos</th>
-            <th>Total</th>
-            <th>Estado</th>
-            <th>Acciones</th>
+
+            <th>
+              Fecha
+            </th>
+
+            <th>
+              Usuario
+            </th>
+
+            <th>
+              Método de pago
+            </th>
+
+            <th>
+              Productos
+            </th>
+
+            <th>
+              Total
+            </th>
+
+            <th>
+              Estado
+            </th>
+
+            <th>
+              Acciones
+            </th>
+
           </tr>
+
         </thead>
 
 
         <tbody>
 
-          <tr *ngFor="let venta of ventas">
+          <tr
+            *ngFor="
+              let venta
+              of ventas
+            "
+          >
 
-            <!-- FECHA -->
-            <td class="fecha">
-              {{ venta.fechaVenta | date:'dd/MM/yyyy HH:mm' }}
-            </td>
-
-
-            <!-- USUARIO -->
-            <td>
-              {{ venta.usuario }}
-            </td>
-
-
-            <!-- MÉTODO DE PAGO -->
-            <td>
-              {{ venta.metodoPago }}
-            </td>
-
-
-            <!-- PRODUCTOS -->
             <td>
 
-              <div
-                class="detalle-producto"
-                *ngFor="let detalle of venta.detalles"
-              >
+              <div class="fecha-cell">
 
-                <span class="producto">
-                  {{ detalle.producto }}
-                </span>
+                <div class="fecha-icon">
 
-                <span class="cantidad">
-                  x{{ detalle.cantidad }}
-                </span>
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M7 2h2v2h6V2h2v2h3a2 2 0 0 1 2 2v14H2V6a2 2 0 0 1 2-2h3V2Zm13 8H4v8h16v-8ZM4 8h16V6H4v2Z"
+                    />
+                  </svg>
+
+                </div>
+
+                <div>
+
+                  <strong>
+                    {{
+                      venta.fechaVenta
+                        | date:'dd/MM/yyyy'
+                    }}
+                  </strong>
+
+                  <span>
+                    {{
+                      venta.fechaVenta
+                        | date:'HH:mm'
+                    }}
+                  </span>
+
+                </div>
 
               </div>
 
             </td>
 
 
-            <!-- TOTAL -->
-            <td class="total">
-              Q {{ venta.total | number:'1.2-2' }}
+            <td>
+
+              <div class="usuario-cell">
+
+                <div class="usuario-avatar">
+
+                  {{
+                    venta.usuario
+                      ? venta.usuario.charAt(0)
+                      : 'U'
+                  }}
+
+                </div>
+
+                <strong>
+                  {{ venta.usuario }}
+                </strong>
+
+              </div>
+
             </td>
 
 
-            <!-- ESTADO -->
             <td>
 
-              <span
-                class="estado"
-                [class.registrada]="venta.estado === 'REGISTRADA'"
-                [class.anulada]="venta.estado === 'ANULADA'"
-              >
-                {{ venta.estado }}
+              <span class="metodo-pago">
+
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M3 5h18v14H3V5Zm2 2v2h14V7H5Zm0 5v5h14v-5H5Z"
+                  />
+                </svg>
+
+                {{ venta.metodoPago }}
+
               </span>
 
             </td>
 
 
-            <!-- ACCIONES -->
+            <td>
+
+              <div class="productos-list">
+
+                <div
+                  class="detalle-producto"
+                  *ngFor="
+                    let detalle
+                    of venta.detalles
+                  "
+                >
+
+                  <span class="producto">
+                    {{ detalle.producto }}
+                  </span>
+
+                  <span class="cantidad">
+                    x{{ detalle.cantidad }}
+                  </span>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <td class="total">
+
+              Q {{
+                venta.total
+                  | number:'1.2-2'
+              }}
+
+            </td>
+
+
+            <td>
+
+              <span
+                class="estado"
+                [class.registrada]="
+                  venta.estado === 'REGISTRADA'
+                "
+                [class.anulada]="
+                  venta.estado === 'ANULADA'
+                "
+              >
+
+                <span class="estado-dot"></span>
+
+                {{ venta.estado }}
+
+              </span>
+
+            </td>
+
+
             <td>
 
               <button
-                *ngIf="venta.estado === 'REGISTRADA'"
+                *ngIf="
+                  venta.estado === 'REGISTRADA'
+                "
                 type="button"
                 class="btn-anular"
-                (click)="anularVenta(venta)"
+                title="Anular venta"
+                (click)="
+                  anularVenta(venta)
+                "
               >
-                Anular
+
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M6.7 5.3 5.3 6.7 10.6 12l-5.3 5.3 1.4 1.4 5.3-5.3 5.3 5.3 1.4-1.4-5.3-5.3 5.3-5.3-1.4-1.4-5.3 5.3-5.3-5.3Z"
+                  />
+                </svg>
+
               </button>
+
 
               <span
                 class="sin-accion"
-                *ngIf="venta.estado === 'ANULADA'"
+                *ngIf="
+                  venta.estado === 'ANULADA'
+                "
               >
-                Sin acciones
+
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"
+                  />
+                </svg>
+
+                Procesada
+
               </span>
 
             </td>
@@ -160,23 +482,35 @@
     </div>
 
 
-    <!-- SIN VENTAS -->
     <div
       class="sin-datos"
-      *ngIf="ventas.length === 0 && !cargando"
+      *ngIf="
+        ventas.length === 0 &&
+        !cargando
+      "
     >
-      No hay ventas registradas.
+
+      <div class="empty-icon">
+
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M3 4h18v16l-3-2-3 2-3-2-3 2-3-2-3 2V4Zm4 4v2h10V8H7Zm0 4v2h7v-2H7Z"
+          />
+        </svg>
+
+      </div>
+
+      <h3>
+        No hay ventas registradas
+      </h3>
+
+      <p>
+        Las ventas realizadas aparecerán
+        automáticamente en este historial.
+      </p>
+
     </div>
 
   </section>
 
-
-  <!-- MENSAJE -->
-  <div
-    class="mensaje"
-    *ngIf="mensaje"
-  >
-    {{ mensaje }}
-  </div>
-
-</div>
+</section>

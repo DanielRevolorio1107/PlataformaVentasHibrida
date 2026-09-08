@@ -1,119 +1,312 @@
-<div class="ventas-page">
+<section class="ventas-page">
 
+  <!-- ENCABEZADO -->
   <header class="page-header">
-    <div>
-      <h1>Registrar venta</h1>
-      <p>Selecciona los productos del menú disponible de hoy.</p>
-    </div>
 
-    <a routerLink="/dashboard">
-      Volver al inicio
-    </a>
+    <span class="breadcrumb">
+      VENTAS
+    </span>
+
+    <h1>
+      Registrar venta
+    </h1>
+
+    <p>
+      Selecciona los productos disponibles del menú de hoy
+      y completa la información de la venta.
+    </p>
+
   </header>
 
-  <div class="ventas-card" *ngIf="menu">
 
-    <h2>Menú de hoy</h2>
+  <!-- MENSAJE -->
+  <div
+    class="mensaje"
+    *ngIf="mensaje"
+  >
+    <div class="mensaje-icon">
+      i
+    </div>
 
-    <div
-      class="producto"
-      *ngFor="let producto of menu.productos"
-    >
+    <span>
+      {{ mensaje }}
+    </span>
+  </div>
 
-      <div class="producto-info">
-        <strong>{{ producto.nombre }}</strong>
 
-        <span *ngIf="producto.descripcion">
-          {{ producto.descripcion }}
+  <!-- CONTENIDO -->
+  <div
+    class="ventas-layout"
+    *ngIf="menu"
+  >
+
+    <!-- PRODUCTOS -->
+    <section class="productos-panel">
+
+      <div class="panel-header">
+
+        <div>
+          <h2>
+            Menú de hoy
+          </h2>
+
+          <p>
+            Selecciona las cantidades que deseas registrar.
+          </p>
+        </div>
+
+        <span class="menu-badge">
+          {{ menu.productos.length }}
+          {{ menu.productos.length === 1 ? 'producto' : 'productos' }}
         </span>
+
+      </div>
+
+
+      <div class="productos-list">
+
+        <article
+          class="producto"
+          *ngFor="let producto of menu.productos"
+          [class.seleccionado]="producto.cantidad > 0"
+        >
+
+          <!-- ICONO -->
+          <div class="producto-avatar">
+            {{
+              producto.nombre
+                ? producto.nombre.charAt(0)
+                : 'P'
+            }}
+          </div>
+
+
+          <!-- INFORMACIÓN -->
+          <div class="producto-info">
+
+            <strong>
+              {{ producto.nombre }}
+            </strong>
+
+            <span
+              *ngIf="producto.descripcion"
+              class="descripcion"
+            >
+              {{ producto.descripcion }}
+            </span>
+
+            <span class="precio">
+              Q {{ producto.precio | number:'1.2-2' }}
+            </span>
+
+          </div>
+
+
+          <!-- CANTIDAD -->
+          <div class="cantidad">
+
+            <button
+              type="button"
+              class="cantidad-btn"
+              (click)="disminuirCantidad(producto)"
+              [disabled]="producto.cantidad <= 0"
+              aria-label="Disminuir cantidad"
+            >
+              −
+            </button>
+
+            <div class="cantidad-actual">
+              {{ producto.cantidad }}
+            </div>
+
+            <button
+              type="button"
+              class="cantidad-btn sumar"
+              (click)="aumentarCantidad(producto)"
+              aria-label="Aumentar cantidad"
+            >
+              +
+            </button>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- RESUMEN -->
+    <aside class="resumen-panel">
+
+      <div class="resumen-header">
+
+        <div class="resumen-icon">
+
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M3 4h18v16l-3-2-3 2-3-2-3 2-3-2-3 2V4Zm4 4v2h10V8H7Zm0 4v2h7v-2H7Z"
+            />
+          </svg>
+
+        </div>
+
+        <div>
+          <h2>
+            Resumen de venta
+          </h2>
+
+          <p>
+            Información de la operación
+          </p>
+        </div>
+
+      </div>
+
+
+      <!-- MÉTODO DE PAGO -->
+      <div class="form-group">
+
+        <label for="metodoPago">
+          Método de pago
+        </label>
+
+        <div class="select-wrapper">
+
+          <select
+            id="metodoPago"
+            [(ngModel)]="metodoPagoId"
+          >
+
+            <option value="">
+              Selecciona un método
+            </option>
+
+            <option
+              *ngFor="let metodo of metodosPago"
+              [value]="metodo.id"
+            >
+              {{ metodo.nombre }}
+            </option>
+
+          </select>
+
+          <span class="select-arrow">
+            ▾
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- OBSERVACIONES -->
+      <div class="form-group">
+
+        <label for="observaciones">
+          Observaciones
+        </label>
+
+        <textarea
+          id="observaciones"
+          [(ngModel)]="observaciones"
+          placeholder="Agrega una nota si es necesario..."
+        ></textarea>
 
         <small>
-          Q {{ producto.precio | number:'1.2-2' }}
+          Campo opcional
         </small>
-      </div>
-
-      <div class="cantidad">
-
-        <button
-          type="button"
-          (click)="disminuirCantidad(producto)"
-        >
-          -
-        </button>
-
-        <span>
-          {{ producto.cantidad }}
-        </span>
-
-        <button
-          type="button"
-          (click)="aumentarCantidad(producto)"
-        >
-          +
-        </button>
 
       </div>
 
-    </div>
 
-    <div class="form-group">
-      <label for="metodoPago">
-        Método de pago
-      </label>
+      <!-- TOTAL -->
+      <div class="total-box">
 
-      <select
-        id="metodoPago"
-        [(ngModel)]="metodoPagoId"
-      >
-        <option value="">
-          Selecciona un método
-        </option>
+        <div class="total-label">
+          <span>
+            Total de la venta
+          </span>
 
-        <option
-          *ngFor="let metodo of metodosPago"
-          [value]="metodo.id"
-        >
-          {{ metodo.nombre }}
-        </option>
-      </select>
-    </div>
+          <small>
+            Importe a cobrar
+          </small>
+        </div>
 
-    <div class="form-group">
-      <label for="observaciones">
-        Observaciones
-      </label>
+        <strong>
+          Q {{ calcularTotal() | number:'1.2-2' }}
+        </strong>
 
-      <textarea
-        id="observaciones"
-        [(ngModel)]="observaciones"
-        placeholder="Opcional"
-      ></textarea>
-    </div>
+      </div>
 
-    <div class="total">
-      <span>Total</span>
 
-      <strong>
-        Q {{ calcularTotal() | number:'1.2-2' }}
-      </strong>
-    </div>
-
-    <button
+      <!-- BOTÓN -->
+      <button
         type="button"
         class="registrar"
         (click)="registrarVenta()"
         [disabled]="cargando"
->
-        {{ cargando ? 'Registrando...' : 'Registrar venta' }}
-    </button>
+      >
+
+        <svg
+          *ngIf="!cargando"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"
+          />
+        </svg>
+
+        {{
+          cargando
+            ? 'Registrando venta...'
+            : 'Registrar venta'
+        }}
+
+      </button>
+
+
+      <div class="security-note">
+
+        <span class="security-dot"></span>
+
+        <span>
+          La venta será almacenada localmente
+          y sincronizada automáticamente.
+        </span>
+
+      </div>
+
+    </aside>
 
   </div>
 
-  <p
-    class="mensaje"
-    *ngIf="mensaje"
-  >
-    {{ mensaje }}
-  </p>
 
-</div>
+  <!-- SIN MENÚ -->
+  <div
+    class="empty-state"
+    *ngIf="!menu && !mensaje"
+  >
+
+    <div class="empty-icon">
+
+      <svg viewBox="0 0 24 24">
+        <path
+          d="M4 3h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 4v2h12V7H6Zm0 4v2h12v-2H6Zm0 4v2h8v-2H6Z"
+        />
+      </svg>
+
+    </div>
+
+    <h2>
+      Cargando menú
+    </h2>
+
+    <p>
+      Estamos consultando los productos disponibles del día.
+    </p>
+
+  </div>
+
+</section>
